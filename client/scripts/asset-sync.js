@@ -141,6 +141,8 @@ export function assetSync() {
     name: 'bonmarche-asset-sync',
 
     async buildStart() {
+      // on Vercel / CI the converted images are already in public/images (committed) – skip
+      if (process.env.VERCEL || process.env.CI) return
       entries = await loadConfig()
       await syncAll(entries, { log })
     },
