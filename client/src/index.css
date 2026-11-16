@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-3xl: 112.5rem; /* large Full-HD+ screens (footer exact-height layout) */
+  /* Brand palette (Bon Marché) – sampled from the design */
+  --color-brand-50: #eef8f5;
+  --color-brand-100: #dcf1eb;
+  --color-brand-200: #b7e2d7;
+  --color-brand-300: #82cbbb;
+  --color-brand-400: #3aab9c;
+  --color-brand-500: #24978a;
+  --color-brand-600: #138377;
+  --color-brand-700: #0f6f66;
+  --color-brand-800: #0e5d56;
+  --color-brand-900: #0a4743;
+
+  --color-accent-400: #ff8a3d;
+  --color-accent-500: #f37021;
+  --color-accent-600: #dc5f12;
+
+  --color-mint: #e7f4f1;
+  --color-mint-soft: #f1f9f7;
+  --color-ink: #1d3f3b;
+  --color-muted: #5f716e;
+  --color-footer: #0e5d56;
+  --color-footer-light: #57a89d;
+
+  /*
+   * Fonts for the whole site:
+   *  - English / numbers: "Nunito Sans"
+   *  - Thai: "Noto Sans Thai" (Nunito Sans has no Thai letters)
+   * The browser picks the right one per character automatically.
+   * (The variable keeps its old name --font-roboto so nothing else has to change.)
+   */
+  --font-roboto: "Nunito Sans", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-roboto);
+  --font-head: var(--font-roboto);
+  --font-display: var(--font-roboto);
+  --font-script: var(--font-roboto);
+  --font-thaiscript: var(--font-roboto);
+  --font-hand: var(--font-roboto);
+
+  /* slow "radar" ring around the Visit Us pin */
+  /* Shop Directory: cards added by "ดูร้านเพิ่มเติม" fade up */
+  --animate-card-in: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* multi-colour title "running lights": letters hop in turn + a shine sweeps across */
+  --animate-letter-hop: letter-hop 3.2s ease-in-out infinite;
+  --animate-text-shine: text-shine 3.2s ease-in-out infinite;
+  @keyframes letter-hop {
+    0%, 30%, 100% { transform: translateY(0); }
+    12% { transform: translateY(-0.14em); }
+  }
+  @keyframes text-shine {
+    0% { background-position: 160% 0; }
+    55%, 100% { background-position: -60% 0; }
+  }
+
+  /* page change: the new page fades / slides up. "backwards" (not "both"): once it
+     ends nothing stays applied – a leftover transform/filter would make fixed
+     popups (shop dialog) position themselves inside the page instead of the screen */
+  --animate-page-enter: page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(18px); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
+
+  --animate-pin-ring: pin-ring 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  @keyframes pin-ring {
+    0% { transform: scale(1); opacity: 0.7; }
+    70%, 100% { transform: scale(1.9); opacity: 0; }
+  }
+
+  --shadow-card: 0 4px 16px -6px rgb(12 80 72 / 0.18), 0 1px 3px rgb(12 80 72 / 0.06);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white font-sans text-ink antialiased;
+  }
+}
+
+@layer components {
+  .container-bm {
+    @apply mx-auto w-full max-w-[1200px] px-4;
+  }
+
+  /*
+   * Large screens (1536px+): the 1200px layout is scaled up smoothly with the
+   * screen width so it always fills the screen in the same proportions
+   * (content ≈ 83% of the width, e.g. 1600px on 1920px, 1667px on 2000px).
+   * --bm-zoom / --nav-zoom are set from JavaScript (src/fitScreen.js).
+   */
+  @media (min-width: 1536px) {
+    .container-bm,
+    .bm-scale {
+      zoom: var(--bm-zoom, 1.15);
+    }
+    /* nav bar grows less than the content but stays aligned with its edges */
+    .nav-scale {
+      zoom: var(--nav-zoom, 1.04);
+      max-width: calc(1200px * var(--bm-zoom, 1.15) / var(--nav-zoom, 1.04)) !important;
+      padding-inline: 16px !important;
+    }
+  }
+
+  .panel-bm {
+    @apply rounded-[22px] bg-mint;
+  }
+  .circle-arrow {
+    @apply inline-flex size-[26px] shrink-0 items-center justify-center rounded-full bg-brand-100/80 text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white;
+  }
+  .pill-tag {
+    @apply rounded-full bg-accent-500 px-2.5 py-[3px] text-[12px] font-semibold leading-none text-white shadow-[0_2px_6px_-1px_rgb(243_112_33/0.5)];
+  }
+  /* bold "marker" look for the Thai handwritten headline */
+  .marker {
+    -webkit-text-stroke: 1.4px currentColor;
+    paint-order: stroke fill;
+  }
+}
+
+/*
+ * Scroll reveal (src/components/ScrollFx.jsx): sections and cards rise, un-blur
+ * and fade in when they come on screen. Uses an animation (not a transition) so
+ * it never fights the hover effects on cards; "backwards" = hidden during the
+ * delay and nothing left applied afterwards.
+ */
+.reveal {
+  opacity: 0;
+}
+.reveal.reveal-in {
+  opacity: 1;
+  animation: reveal-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) backwards;
+}
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(60px) scale(0.96);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+/* scrolling back up: elements drop in from above instead */
+.reveal.reveal-in.reveal-from-top {
+  animation-name: reveal-down;
+}
+@keyframes reveal-down {
+  from {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.96);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* "reduce motion" on (e.g. Windows animation effects off): fade only – still visible */
+@media (prefers-reduced-motion: reduce) {
+  .reveal.reveal-in,
+  .reveal.reveal-in.reveal-from-top {
+    animation-name: reveal-fade;
+    animation-duration: 0.6s;
+  }
+}
+
+/*
+ * Page transitions (View Transitions API – Chrome, Edge, Safari 18+; links with
+ * viewTransition in SmartLink.jsx). The new page opens as a circle growing from
+ * where the visitor clicked (--vt-x / --vt-y, set in App.jsx) while the old page
+ * shrinks back and blurs. Header, progress line and back-to-top button have their
+ * own layers and stay still.
+ */
+::view-transition-group(site-header),
+::view-transition-group(scroll-progress),
+::view-transition-group(back-to-top),
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-old(scroll-progress),
+::view-transition-new(scroll-progress),
+::view-transition-old(back-to-top),
+::view-transition-new(back-to-top) {
+  animation: none;
+}
+::view-transition-old(root) {
+  animation: vt-old 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-new 0.8s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes vt-old {
+  to {
+    opacity: 0.3;
+    transform: scale(0.92);
+    filter: blur(4px);
+  }
+}
+@keyframes vt-new {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50vw) var(--vt-y, 50vh));
+  }
+  to {
+    clip-path: circle(150vmax at var(--vt-x, 50vw) var(--vt-y, 50vh));
+  }
+}
+/* behind both pages during the change: brand gradient (seen around the shrinking old page) */
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+html::view-transition {
+  background: linear-gradient(135deg, #0e5d56, #138377 45%, #ec1c8c 100%);
+}
+/* "reduce motion" on: a quick cross-fade instead of the circle */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root) {
+    animation: reveal-fade 0.3s reverse both;
+  }
+  ::view-transition-new(root) {
+    animation: reveal-fade 0.3s both;
+  }
+}

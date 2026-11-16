@@ -1,0 +1,340 @@
+/*
+ * ===========================================================================
+ *  Translations  –  Thai text  →  [ English, 中文 ]
+ * ===========================================================================
+ *  The Thai text itself is the key, so the same table translates
+ *   - texts in the components (buttons, headings …)
+ *   - data from the database / built-in data (menus, shops, categories …)
+ *  as long as the Thai text is exactly the same.
+ *  Missing entries simply stay in Thai.
+ *
+ *  {name} = a value filled in by the code, e.g. 'อีก {n} ร้าน' → 'อีก 4 ร้าน'
+ *
+ *  To add / fix a translation: add a line  'Thai text': ['English', '中文'],
+ * ===========================================================================
+ */
+export const DICT = {
+  /* ---------------- navigation / header ---------------- */
+  'หน้าแรก': ['Home', '首页'],
+  'ร่วมธุรกิจกับเรา': ['Partner with us', '商务合作'],
+  'Shop Directory': ['Shop Directory', '店铺指南'],
+  'Blog': ['Blog', '博客'],
+  'About Us': ['About Us', '关于我们'],
+  'Contact': ['Contact', '联系我们'],
+  'Visit Us': ['Visit Us', '到访指南'],
+  'เช่าพื้นที่': ['Rent a space', '租赁空间'],
+  'ร้านค้า': ['Shops', '店铺'],
+  'สำนักงาน': ['Offices', '办公室'],
+  'บูธชั่วคราว': ['Pop-up booths', '临时摊位'],
+  'บูธกิจกรรม': ['Event booths', '活动摊位'],
+  'ห้องประชุม/สัมมนา': ['Meeting / seminar rooms', '会议 / 研讨室'],
+  'สื่อประชาสัมพันธ์': ['Advertising media', '广告媒体'],
+  'พื้นที่เก็บสินค้า': ['Storage space', '仓储空间'],
+  'เปิดร้านในตลาดและโซนอาหาร': ['Open a shop in the market or food zone', '在市场或美食区开店'],
+  'ออฟฟิศพร้อมใช้ ใจกลางชุมชน': ['Ready-to-use offices in the community', '社区中心的现成办公室'],
+  'ออกบูธรายวัน / รายสัปดาห์': ['Daily / weekly booths', '按日 / 按周摊位'],
+  'อีเวนต์ เปิดตัวสินค้า เวิร์กช็อป': ['Events, launches, workshops', '活动、新品发布、工作坊'],
+  'ห้องประชุม อบรม สัมมนา': ['Meetings, training, seminars', '会议、培训、研讨会'],
+  'ป้ายโฆษณา จอ LED และโซเชียล': ['Billboards, LED screens and social media', '广告牌、LED 屏和社交媒体'],
+  'คลังเก็บสินค้าใกล้ร้านคุณ': ['Storage close to your shop', '靠近店铺的仓库'],
+  'ดูพื้นที่ทั้งหมด': ['See all spaces', '查看全部空间'],
+  '{n} ประเภท': ['{n} types', '{n} 种'],
+  'โทรหาฝ่ายขาย': ['Call our sales team', '致电招商部'],
+  'ค้นหา': ['Search', '搜索'],
+  'เมนู': ['Menu', '菜单'],
+  'ภาษา': ['Language', '语言'],
+  'เลือกภาษา': ['Choose language', '选择语言'],
+
+  /* ---------------- home page ---------------- */
+  'ค้นหาร้านค้า / อาหาร / สินค้า': ['Find shops / food / products', '查找店铺 / 美食 / 商品'],
+  'ดูอีเวนต์ / โปรโมชั่น': ['Events / promotions', '活动 / 优惠'],
+  'การเดินทาง / วิธีมาที่นี่': ['Getting here', '交通指南'],
+  'This week': ['This week', '本周'],
+  'This week at {site}': ['This week at {site}', '本周 {site}'],
+  'อัปเดตอีเวนต์และโปรโมชั่นของสุดสัปดาห์นี้': ["This weekend's events and promotions", '本周末活动与优惠'],
+  'ค้นหาตามหมวดหมู่': ['Browse by category', '按类别浏览'],
+  'เลือกช้อปได้ตามที่คุณต้องการ': ['Shop for exactly what you need', '随心选购'],
+  'Must-try & New Shops': ['Must-try & New Shops', '必逛好店 & 新店'],
+  'คัดสรรร้านเด็ด 10-15 ร้าน และอัปเดตร้านเปิดใหม่': ['10–15 hand-picked favourites and the newest shops', '精选 10–15 家人气店铺与新开店铺'],
+  'ใหม่': ['New', '新'],
+  'ดูทั้งหมด': ['See all', '查看全部'],
+  'ข้อมูลการเข้ามาใช้บริการ': ['Visitor information', '到访信息'],
+  'ข้อมูลการเข้ามาใช้บริการของเรา': ['Everything you need for your visit', '到访须知'],
+  'ดูแผนที่': ['View map', '查看地图'],
+  'เดินทางสะดวก': ['Easy to get here', '交通便利'],
+  'ใกล้รถไฟฟ้า / ที่จอดรถกว้างขวาง': ['Near the skytrain / spacious parking', '临近轻轨 / 宽敞停车场'],
+  'พื้นที่ให้เช่า': ['Space for rent', '招租空间'],
+  'พื้นที่ให้เช่า บอนมาร์เช่': ['Bon Marché rental space', 'Bon Marché 招租空间'],
+  'เปิดร้านที่นี่ ไปด้วยกัน': ['Open your shop here, grow together', '在这里开店，一起成长'],
+
+  /* ---------------- footer ---------------- */
+  'ลิงก์ด่วน': ['Quick links', '快速链接'],
+  'บริการของเรา': ['Our services', '我们的服务'],
+  'ติดต่อเรา': ['Contact us', '联系我们'],
+  'เกี่ยวกับเรา': ['About us', '关于我们'],
+  'ค้นหาร้านค้า': ['Find shops', '查找店铺'],
+  'โปรโมชั่น': ['Promotions', '优惠'],
+  'กิจกรรม': ['Activities', '活动'],
+  'ข่าวสารและประกาศ': ['News & announcements', '新闻与公告'],
+  'พื้นที่ให้เช่าร้านค้า': ['Shop space for rent', '店铺招租'],
+  'ที่จอดรถกว่า 500 คัน': ['Parking for 500+ cars', '500+ 个停车位'],
+  'รถเข็นผู้สูงอายุ (ฟรี)': ['Wheelchairs for seniors (free)', '长者轮椅（免费）'],
+  'รถเข็นสัตว์เลี้ยง (ฟรี)': ['Pet strollers (free)', '宠物推车（免费）'],
+  'ตลาดมาตรฐานระดับเพชร': ['Diamond-standard market', '钻石级标准市场'],
+  'ระบบผู้ประกอบการ': ['Tenant portal', '商户系统'],
+  'ข้อกำหนดการใช้งาน': ['Terms of use', '使用条款'],
+  'นโยบายความเป็นส่วนตัว': ['Privacy policy', '隐私政策'],
+  'นโยบายคุกกี้': ['Cookie policy', 'Cookie 政策'],
+  'แผนผังเว็บไซต์': ['Sitemap', '网站地图'],
+
+  /* ---------------- settings (built-in + current database) ---------------- */
+  'สุขภาพดี': ['Good health', '健康生活'],
+  'เริ่มได้ที่นี่': ['starts here', '从这里开始'],
+  'อาหารดี ของใช้ปลอดภัย\nเพื่อสุขภาพที่ยั่งยืน': ['Good food, safe products\nfor lasting health', '好食材、安心好物\n成就持久健康'],
+  'ชมวิดีโอแนะนำบอนมาร์เช่': ['Watch the Bon Marché video', '观看 Bon Marché 介绍视频'],
+  'สุขภาพดี เริ่มได้ที่นี่': ['Good health starts here', '健康生活，从这里开始'],
+  'พื้นที่ให้เช่า ร้านค้า / ร้านอาหาร / คอมมูนิตี้สเปซ': ['Space for rent: shops / restaurants / community space', '招租：店铺 / 餐厅 / 社区空间'],
+  'พื้นที่ให้เช่า ร้านค้า / แผงลอย / คอนเซ็ปต์สโตร์': ['Space for rent: shops / stalls / concept stores', '招租：店铺 / 摊位 / 概念店'],
+  'พร้อมเปิดโอกาสให้ธุรกิจของคุณเติบโต\nไปกับสังคมที่ยั่งยืน และชุมชนของเรา': ['Grow your business with\na sustainable society and our community', '让您的生意与可持续社会\n和我们的社区一起成长'],
+  'มาร่วมเป็นส่วนหนึ่งของบอนมาร์เช่\nกับทำเลที่ดีที่สุด และชุมชนคุณภาพ': ['Become part of Bon Marché\nwith a prime location and a great community', '成为 Bon Marché 的一员\n黄金地段，优质社区'],
+  'สอบถามข้อมูลเพิ่มเติม': ['Ask for details', '咨询详情'],
+  'ข้อมูลสำหรับผู้เช่า': ['Tenant information', '租户信息'],
+  'บอง มาร์เช่ มาร์เก็ตพาร์ค': ['Bon Marché Market Park', 'Bon Marché 市场公园'],
+  'บอนมาร์เช่': ['Bon Marché', 'Bon Marché'],
+  '105/1 ถ.เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900': [
+    '105/1 Thetsaban Songkhro Rd., Lat Yao, Chatuchak, Bangkok 10900',
+    '曼谷 10900 乍都节区 拉耀分区 Thetsaban Songkhro 路 105/1 号',
+  ],
+  '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10250': [
+    '123 Sukhumvit Rd., Khlong Toei, Bangkok 10250',
+    '曼谷 10250 空堤区 素坤逸路 123 号',
+  ],
+  'ทุกวัน 05.00 – 22.00 น.': ['Daily 05:00 – 22:00', '每天 05:00 – 22:00'],
+  'ทุกวัน 08.00 – 22.00 น.': ['Daily 08:00 – 22:00', '每天 08:00 – 22:00'],
+  'ตลาดสดพรีเมียมและคอมมูนิตี้ย่านจตุจักร มาตรฐานตลาดระดับเพชร และรางวัล Bangkok Premium Market 2565 อาหารดี ของใช้ปลอดภัย เพื่อสุขภาพที่ยั่งยืน': [
+    'A premium fresh market and community in Chatuchak – diamond-standard market and winner of Bangkok Premium Market 2022. Good food and safe products for lasting health.',
+    '位于乍都节的高端生鲜市场与社区，钻石级标准市场，荣获 2022 年曼谷优质市场奖。好食材、安心好物，成就持久健康。',
+  ],
+  'Bon Marché Market Park. สงวนลิขสิทธิ์': ['Bon Marché Market Park. All rights reserved.', 'Bon Marché Market Park 版权所有'],
+
+  /* ---------------- This week ---------------- */
+  'อีเวนต์': ['Event', '活动'],
+  'เมนูสุขภาพเพื่อคุณ': ['Healthy menu for you', '为您准备的健康餐'],
+  'กาแฟพรีเมียม ลดพิเศษ': ['Premium coffee, special price', '精品咖啡特价'],
+  'ผักผลไม้ปลอดสารพิษ': ['Chemical-free fruit & veg', '无农药蔬果'],
+  'อาหารไทยต้นตำรับ': ['Authentic Thai food', '正宗泰国菜'],
+  'ผลิตภัณฑ์ดูแลสุขภาพ': ['Health & care products', '健康护理产品'],
+  '12–14 ก.ย. 68': ['Sep 12–14, 2025', '2025年9月12–14日'],
+  '12–15 ก.ย. 68': ['Sep 12–15, 2025', '2025年9月12–15日'],
+  '13–14 ก.ย. 68': ['Sep 13–14, 2025', '2025年9月13–14日'],
+  '14–16 ก.ย. 68': ['Sep 14–16, 2025', '2025年9月14–16日'],
+  '15–17 ก.ย. 68': ['Sep 15–17, 2025', '2025年9月15–17日'],
+
+  /* ---------------- categories ---------------- */
+  'อาหาร & เครื่องดื่ม': ['Food & drinks', '餐饮'],
+  'ผักผลไม้\nของสด': ['Fresh\nproduce', '生鲜\n蔬果'],
+  'แฟชั่น & ไลฟ์สไตล์': ['Fashion & lifestyle', '时尚生活'],
+  'คาเฟ่ & ร้านอาหาร': ['Cafés & restaurants', '咖啡馆与餐厅'],
+  'สุขภาพ & ความงาม': ['Health & beauty', '健康美容'],
+  'ของใช้ในบ้าน': ['Home & living', '家居用品'],
+  'ดูดวง & โหราศาสตร์': ['Fortune telling', '占卜星象'],
+  'แผนที่ & การเดินทาง': ['Map & directions', '地图与交通'],
+
+  /* ---------------- visit info ---------------- */
+  'เวลาเปิด-ปิด': ['Opening hours', '营业时间'],
+  'ที่จอดรถ': ['Parking', '停车场'],
+  'มากกว่า 500 คัน': ['500+ spaces', '500+ 个车位'],
+  'รถเข็นผู้สูงอายุ': ['Wheelchairs', '轮椅'],
+  'บริการฟรีที่จุดประชาสัมพันธ์': ['Free at the information desk', '服务台免费提供'],
+
+  /* ---------------- shops ---------------- */
+  'ร้านเด็ด': ['Must-try', '人气店'],
+  'ร้านเปิดใหม่': ['New shop', '新店'],
+  'ข้าวมันไก่ไรรินทร์': ['Rairin Chicken Rice', '莱琳海南鸡饭'],
+  'ร้านอาหารไทยชื่อดัง': ['Famous Thai restaurant', '知名泰餐'],
+  'เบเกอรี่ & ขนมหวาน': ['Bakery & desserts', '烘焙与甜点'],
+  'น้ำผลไม้ปั่นเพื่อสุขภาพ': ['Healthy smoothies', '健康果昔'],
+  'แฟชั่น & ระดับไลฟ์สไตล์': ['Fashion & lifestyle', '时尚生活'],
+  'อาหารทะเลสดใหม่': ['Fresh seafood', '新鲜海鲜'],
+  'สลัดและเมนูสุขภาพ': ['Salads & healthy meals', '沙拉与健康餐'],
+  'กาแฟพรีเมียม': ['Premium coffee', '精品咖啡'],
+  'สวนผลไม้ป้าแดง': ["Auntie Daeng's Orchard", '红姨果园'],
+  'ผลไม้ตามฤดูกาล': ['Seasonal fruit', '时令水果'],
+  'ปลาสดแม่กลอง': ['Mae Klong Fresh Fish', '美功鲜鱼'],
+  'ปลาและอาหารทะเลสด': ['Fresh fish & seafood', '鲜鱼与海鲜'],
+  'เขียงหมูลุงชัย': ["Uncle Chai's Pork", '猜叔猪肉铺'],
+  'เนื้อสัตว์สดอนามัย': ['Fresh, hygienic meat', '卫生鲜肉'],
+  'ก๋วยเตี๋ยวเรือป้าศรี': ["Auntie Sri's Boat Noodles", '诗姨船面'],
+  'ก๋วยเตี๋ยวเรือ': ['Boat noodles', '船面'],
+  'ขนมไทยแม่บุญ': ["Mae Boon's Thai Desserts", '文妈泰式甜点'],
+  'ขนมไทยโบราณ': ['Traditional Thai desserts', '传统泰式甜点'],
+  'ชาหอม Tea House': ['Cha Hom Tea House', '茶香 Tea House'],
+  'ชาไทยและชาสมุนไพร': ['Thai & herbal tea', '泰式茶与草本茶'],
+  'ไอศกรีมโฮมเมด': ['Homemade ice cream', '手工冰淇淋'],
+  'เสื้อผ้าผ้าลินิน': ['Linen clothing', '亚麻服饰'],
+  'รองเท้าและกระเป๋า': ['Shoes & bags', '鞋包'],
+  'สมุนไพรบ้านยาย': ["Grandma's Herbs", '外婆草本'],
+  'สมุนไพรไทย': ['Thai herbs', '泰国草本'],
+  'ทำเล็บและสปา': ['Nails & spa', '美甲与水疗'],
+  'ต้นไม้และอุปกรณ์จัดสวน': ['Plants & gardening', '植物与园艺'],
+  'อาจารย์ทิพย์ ดูดวง': ['Master Thip Fortune Telling', '蒂普大师占卜'],
+  'ดูดวงและโหราศาสตร์': ['Fortune telling & astrology', '占卜与星象'],
+  'ข้าวมันไก่ต้มสูตรต้นตำรับ น้ำจิ้มเต้าเจี้ยวรสเข้ม หุงข้าวด้วยน้ำซุปไก่ทุกวัน': [
+    'Classic boiled chicken rice with a rich soybean sauce, rice cooked in chicken broth every day.',
+    '经典白切鸡饭配浓郁豆酱，米饭每天用鸡汤煮制。',
+  ],
+  'เบเกอรี่สไตล์ฝรั่งเศส อบสดใหม่ทุกเช้า มัฟฟิน ครัวซองต์ และเค้กโฮมเมด': [
+    'French-style bakery baked fresh every morning: muffins, croissants and homemade cakes.',
+    '法式烘焙，每天早晨新鲜出炉：松饼、可颂和手工蛋糕。',
+  ],
+  'สมูทตี้ผักผลไม้ปั่นสด ไม่ใส่น้ำตาล เลือกท็อปปิ้งเพื่อสุขภาพได้': [
+    'Fresh fruit & veg smoothies with no added sugar and healthy toppings.',
+    '新鲜蔬果果昔，无添加糖，可选健康配料。',
+  ],
+  'เสื้อผ้าแฟชั่นสไตล์มินิมอล ใส่ได้ทุกวัน ทั้งผู้หญิงและผู้ชาย': [
+    'Minimal everyday fashion for women and men.',
+    '简约日常时装，男女皆宜。',
+  ],
+  'อาหารทะเลสดส่งตรงทุกเช้า หอย กุ้ง ปลา พร้อมบริการปรุงสุก': [
+    'Seafood delivered fresh every morning – shellfish, prawns, fish – and we can cook it for you.',
+    '每天早晨新鲜到货的海鲜：贝类、虾、鱼，并提供代加工服务。',
+  ],
+  'สลัดผักออร์แกนิก อกไก่ย่าง และน้ำสลัดโฮมเมดแคลอรี่ต่ำ': [
+    'Organic salads, grilled chicken breast and low-calorie homemade dressings.',
+    '有机沙拉、烤鸡胸和低卡自制酱汁。',
+  ],
+  'กาแฟคั่วเองจากเมล็ดไทย ลาเต้อาร์ตทุกแก้ว มุมนั่งสบายรับลม': [
+    'House-roasted Thai beans, latte art in every cup and a breezy place to sit.',
+    '自家烘焙泰国咖啡豆，每杯都有拉花，舒适通风的座位。',
+  ],
+  'ผักผลไม้ปลอดสารจากเกษตรกรเครือข่าย คัดสดใหม่ทุกวัน': [
+    'Chemical-free fruit and vegetables from partner farmers, picked fresh daily.',
+    '来自合作农户的无农药蔬果，每日新鲜挑选。',
+  ],
+  'อาหารไทยรสจัดจ้าน ปลาหมึกย่าง ส้มตำ ลาบ และกับข้าวพร้อมทาน': [
+    'Bold Thai flavours: grilled squid, som tam, larb and ready-to-eat dishes.',
+    '浓郁泰式风味：烤鱿鱼、青木瓜沙拉、凉拌肉末和即食菜肴。',
+  ],
+  'สกินแคร์และผลิตภัณฑ์ดูแลผิวจากธรรมชาติ อ่อนโยน ปลอดภัย': [
+    'Gentle, safe natural skincare products.',
+    '温和安全的天然护肤品。',
+  ],
+  'ผลไม้ตามฤดูกาลจากสวน ทุเรียน มังคุด มะม่วง หวานฉ่ำ': [
+    'Sweet seasonal fruit from the orchard: durian, mangosteen, mango.',
+    '果园直送的香甜时令水果：榴莲、山竹、芒果。',
+  ],
+  'ปลาทู ปลากะพง และอาหารทะเลสดจากแม่กลอง ขอดเกล็ดให้ฟรี': [
+    'Mackerel, sea bass and fresh seafood from Mae Klong – free scaling.',
+    '来自美功的鲭鱼、鲈鱼和新鲜海鲜，免费去鳞。',
+  ],
+  'เนื้อหมูสดจากฟาร์มมาตรฐาน ตัดแต่งตามสั่ง สะอาด ถูกหลักอนามัย': [
+    'Fresh pork from certified farms, cut to order, clean and hygienic.',
+    '来自标准农场的新鲜猪肉，按需切割，干净卫生。',
+  ],
+  'ก๋วยเตี๋ยวเรือน้ำตกสูตรโบราณ ชามเล็กอิ่มอร่อย': [
+    'Traditional boat noodles in rich broth – small bowls, big flavour.',
+    '传统船面，汤头浓郁，小碗大满足。',
+  ],
+  'ขนมชั้น ทองหยิบ ขนมตาล ทำสดทุกวันแบบดั้งเดิม': [
+    'Layered cakes, golden egg-yolk sweets and palm cakes, made fresh daily the traditional way.',
+    '千层糕、金花蛋黄甜点和棕榈糕，每日以传统方式新鲜制作。',
+  ],
+  'ชาไทย ชาเขียว และชาสมุนไพรชงสด หอมกลมกล่อม': [
+    'Freshly brewed Thai tea, green tea and herbal tea.',
+    '现泡泰式茶、绿茶和草本茶，香醇顺口。',
+  ],
+  'ไอศกรีมโฮมเมดรสผลไม้ไทย ทำสดในร้านทุกวัน': [
+    'Homemade ice cream in Thai fruit flavours, made in store every day.',
+    '泰国水果口味手工冰淇淋，每天店内新鲜制作。',
+  ],
+  'เสื้อผ้าผ้าลินินและผ้าฝ้าย ใส่สบาย เหมาะกับอากาศเมืองไทย': [
+    'Comfortable linen and cotton clothing for the Thai weather.',
+    '舒适的亚麻和棉质服装，适合泰国气候。',
+  ],
+  'รองเท้าและกระเป๋าดีไซน์เรียบหรู ราคาเป็นมิตร': [
+    'Elegant shoes and bags at friendly prices.',
+    '简约精致的鞋包，价格亲民。',
+  ],
+  'ยาดม ลูกประคบ และผลิตภัณฑ์สมุนไพรไทยสูตรดั้งเดิม': [
+    'Herbal inhalers, compress balls and traditional Thai herbal products.',
+    '嗅药、草药球和传统泰国草本产品。',
+  ],
+  'ทำเล็บ สปามือเท้า และนวดผ่อนคลาย โดยช่างมืออาชีพ': [
+    'Nails, hand & foot spa and relaxing massage by professionals.',
+    '专业美甲、手足护理和放松按摩。',
+  ],
+  'ของแต่งบ้าน ภาชนะ และของใช้ในครัวดีไซน์สวย': [
+    'Beautiful home décor, tableware and kitchenware.',
+    '精美家居装饰、餐具和厨房用品。',
+  ],
+  'ต้นไม้ฟอกอากาศ ไม้มงคล กระถาง และอุปกรณ์จัดสวน': [
+    'Air-purifying and lucky plants, pots and gardening tools.',
+    '净化空气植物、吉祥植物、花盆和园艺工具。',
+  ],
+  'ดูดวงไพ่ยิปซี ลายมือ และฤกษ์มงคล': [
+    'Tarot, palm reading and auspicious dates.',
+    '塔罗、看手相和择吉日。',
+  ],
+
+  /* ---------------- zones / buildings ---------------- */
+  'โซน A · ตลาดสด': ['Zone A · Fresh market', 'A 区 · 生鲜市场'],
+  'โซน B · ฟู้ดคอร์ท': ['Zone B · Food court', 'B 区 · 美食广场'],
+  'โซน C · คาเฟ่ & เบเกอรี่': ['Zone C · Cafés & bakery', 'C 区 · 咖啡与烘焙'],
+  'โซน D · แฟชั่น & ไลฟ์สไตล์': ['Zone D · Fashion & lifestyle', 'D 区 · 时尚生活'],
+  'โซน E · สุขภาพ & บริการ': ['Zone E · Health & services', 'E 区 · 健康与服务'],
+  'โซน {code}': ['Zone {code}', '{code} 区'],
+  'Fresh Market': ['Fresh Market', '生鲜市场'],
+  'Bon Marché Plaza': ['Bon Marché Plaza', 'Bon Marché 广场'],
+  'ตลาดสด & ฟู้ดคอร์ท': ['Fresh market & food court', '生鲜市场与美食广场'],
+  'คาเฟ่ · แฟชั่น · สุขภาพ': ['Cafés · fashion · health', '咖啡 · 时尚 · 健康'],
+  'All': ['All', '全部'],
+
+  /* ---------------- market map ---------------- */
+  'แผนที่จำลองบอนมาร์เช่': ['Bon Marché simulated map', 'Bon Marché 模拟地图'],
+  'ถ.เทศบาลสงเคราะห์': ['Thetsaban Songkhro Rd.', 'Thetsaban Songkhro 路'],
+  'ที่จอดรถ P': ['Parking P', '停车场 P'],
+  'สวนหย่อม · ลานกิจกรรม': ['Garden · event lawn', '花园 · 活动广场'],
+  'อาคารพาณิชย์': ['Shophouses', '商业楼'],
+  'ทางเข้า': ['Entrance', '入口'],
+  'กดเพื่อเริ่มใช้งาน': ['Explore the market map', '点击开始使用'],
+  'ซูมเข้า': ['Zoom in', '放大'],
+  'ซูมออก': ['Zoom out', '缩小'],
+  'รีเซ็ตแผนที่': ['Reset map', '重置地图'],
+  'แผนที่จำลอง · กดที่โซนเพื่อดูร้าน': ['Simulated map · tap a zone to see its shops', '模拟地图 · 点击区域查看店铺'],
+
+  /* ---------------- shop directory ---------------- */
+  'ค้นหาร้านค้า ร้านอาหาร และบริการทั้งหมดใน {place} ได้ในที่เดียว': [
+    'Find every shop, restaurant and service at {place} in one place',
+    '一站查找 {place} 的所有店铺、餐厅和服务',
+  ],
+  'ค้นหาชื่อร้าน สินค้า หรือเลขล็อก เช่น กาแฟ, A-08': ['Search shop, product or unit, e.g. coffee, A-08', '搜索店名、商品或铺位号，例如 咖啡、A-08'],
+  'ล้างคำค้นหา': ['Clear search', '清除搜索'],
+  'หมวดหมู่': ['categories', '个类别'],
+  'โซน': ['zones', '个区域'],
+  'ร้านเปิดอยู่ตอนนี้': ['open now', '家营业中'],
+  'แสดง {n} ร้าน': ['Showing {n} shops', '显示 {n} 家店铺'],
+  'แสดง {a} จาก {b} ร้าน': ['Showing {a} of {b} shops', '显示 {a} / {b} 家店铺'],
+  'ล้างทั้งหมด': ['Clear all', '全部清除'],
+  'ดูร้านเพิ่มเติม': ['See more shops', '查看更多店铺'],
+  'อีก {n} ร้าน': ['{n} more shops', '还有 {n} 家店铺'],
+  'ไม่พบร้านที่ตรงกับการค้นหา': ['No shops match your search', '没有符合搜索的店铺'],
+  'ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่ / โซนอื่น': ['Try another search, category or zone', '请尝试其他关键词、类别或区域'],
+  'ล้างตัวกรองทั้งหมด': ['Clear all filters', '清除所有筛选'],
+  'เปิดอยู่': ['Open now', '营业中'],
+  'ปิดแล้ว': ['Closed', '已打烊'],
+  'ปิด': ['Close', '关闭'],
+  'ที่ตั้ง': ['Location', '位置'],
+  'ล็อก {u}': ['Unit {u}', '{u} 号铺位'],
+  'โทร': ['Phone', '电话'],
+  'โทรหาร้าน': ['Call shop', '致电店铺'],
+  'เส้นทางมาตลาด': ['Directions', '前往路线'],
+  '{h} น.': ['{h}', '{h}'],
+
+  /* ---------------- other pages ---------------- */
+  'ไม่พบหน้าที่คุณต้องการ': ['Page not found', '找不到该页面'],
+  'กลับหน้าแรก': ['Back to home', '返回首页'],
+  'กลับขึ้นด้านบน': ['Back to top', '返回顶部'],
+}
+
+/* patterns for texts that differ only by a number, e.g. "02-953-8980 ต่อ 101" */
+export const RULES = [[/^(.+?) ต่อ (\d+)$/, '$1 ext. $2', '$1 转 $2']]
