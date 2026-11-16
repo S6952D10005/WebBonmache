@@ -70,8 +70,11 @@ export function useScrollReveal(key) {
       main.querySelectorAll(':scope > div > section:not(:first-child), :scope > section:not(:first-child)').forEach((el) => track(el))
       // cards: in each grid row they follow one another from left to right
       main.querySelectorAll(':scope > div > section:not(:first-child) .grid, :scope > section:not(:first-child) .grid').forEach((grid) => {
+        // only real card grids: skip small "grid place-items-center" boxes that just centre an icon
+        const cards = [...grid.children].filter((el) => el instanceof HTMLElement)
+        if (cards.length < 2) return
         const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 1
-        ;[...grid.children].forEach((el, i) => track(el, (i % cols) * 80 + 100))
+        cards.forEach((el, i) => track(el, (i % cols) * 80 + 100))
       })
     }
 
