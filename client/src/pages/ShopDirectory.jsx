@@ -13,7 +13,7 @@ import { useI18n } from '../i18n'
 /*
  * Shop Directory
  *   hero image + title / search card
- *   → market map (simulated 2D/3D – tap a zone to filter)
+ *   → market map (3D plan from the CAD drawing – tap a building to filter)
  *   → building tabs (All / Fresh Market / Bon Marché Plaza)
  *   → category icons (each category has its own colour)
  *   → shop cards → detail dialog
@@ -488,7 +488,7 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
 
 
       <section className="container-bm pb-16 pt-6">
-        {/* ================= market map (simulated 2D / 3D) ================= */}
+        {/* ================= market map (3D plan from CAD) ================= */}
         <MarketMap zones={zones} counts={zoneCounts} selected={zone} onSelect={selectZone} />
 
         {/* ================= building tabs ================= */}

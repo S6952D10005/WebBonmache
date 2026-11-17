@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "assets": "node scripts/asset-sync.js --all"
+    "assets": "node scripts/asset-sync.js --all",
+    "cad-map": "node scripts/cad-map.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.72.0",
@@ -16,6 +17,7 @@
     "react-router": "^7.18.5"
   },
   "devDependencies": {
+    "@mlightcad/libredwg-web": "^0.9.0",
     "@tailwindcss/vite": "^4.3.5",
     "@vitejs/plugin-react": "^6.3.0",
     "sharp": "^0.35.5",
