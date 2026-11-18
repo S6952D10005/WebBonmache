@@ -36,7 +36,7 @@ export default function Home({ settings }) {
       <Events items={data.events} />
       <News items={data.news} />
       <Awards items={data.awards} />
-      <SocialFeed links={data.social.links} posts={data.social.posts} />
+      <SocialFeed links={data.social.links} posts={data.social.posts} page={settings.site_name} />
       <GettingHere settings={settings} info={data.gettingHere} />
     </>
   )

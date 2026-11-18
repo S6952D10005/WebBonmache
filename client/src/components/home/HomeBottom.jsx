@@ -1,5 +1,22 @@
-import { useState } from 'react'
-import { ArrowRight, Award, Clock3, MapPin, Medal, Navigation, Phone, Play, ShieldCheck, Trophy } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  ArrowRight,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Eye,
+  Heart,
+  MapPin,
+  Medal,
+  MessageCircle,
+  Navigation,
+  Phone,
+  Play,
+  ShieldCheck,
+  ThumbsUp,
+  Trophy,
+} from 'lucide-react'
 import SmartLink from '../SmartLink'
 import { SmartImage } from '../Decor'
 import { HomeTitle } from './HomeFeeds'
@@ -46,12 +63,24 @@ export function Awards({ items = [] }) {
 /* ======================================================================== */
 /*  Follow us on social media – filter tabs + posts                        */
 /* ======================================================================== */
+/*
+ * Each app's own colours – used by the post cards' hover:
+ *   color = solid brand colour · ring = border that lights up on hover · cta = link text
+ */
 const PLATFORM = {
-  facebook: { name: 'Facebook', color: '#1877f2' },
-  youtube: { name: 'YouTube', color: '#ff0000' },
-  instagram: { name: 'Instagram', color: '#d62976' },
-  tiktok: { name: 'TikTok', color: '#111111' },
+  facebook: { name: 'Facebook', color: '#1877f2', ring: '#1877f2', cta: 'ดูโพสต์บน Facebook' },
+  youtube: { name: 'YouTube', color: '#ff0000', ring: '#ff0000', cta: 'ดูวิดีโอบน YouTube' },
+  instagram: {
+    name: 'Instagram',
+    color: '#d62976',
+    ring: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
+    cta: 'ดูโพสต์บน Instagram',
+  },
+  tiktok: { name: 'TikTok', color: '#111111', ring: 'linear-gradient(120deg,#25f4ee,#111111 45%,#111111 55%,#fe2c55)', cta: 'ดูคลิปบน TikTok' },
 }
+
+/** 18400 → "18.4K" */
+const compact = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}K` : String(n))
 
 /* simple brand marks (drawn here – the icon set has no brand logos) */
 function BrandIcon({ platform, className = 'size-4' }) {
@@ -89,15 +118,161 @@ function BrandIcon({ platform, className = 'size-4' }) {
   }
 }
 
-export function SocialFeed({ links = [], posts = [] }) {
+/**
+ * One post shown like on the app itself: page avatar + name + date, the app's
+ * icon, the post title and text, the picture and the like / view counts.
+ * Hover = that app's own style: its colour lights up the border (Instagram /
+ * TikTok gradient), the icon fills, and
+ *   Facebook  → a "like" thumb pops on the picture
+ *   YouTube   → the play button turns red
+ *   Instagram → a heart pops (double-tap)
+ *   TikTok    → cyan / pink "glitch" edges + black play button
+ */
+function PostCard({ post: p, page }) {
+  const { t } = useI18n()
+  const pf = PLATFORM[p.platform] || PLATFORM.facebook
+  const video = p.platform === 'youtube' || p.platform === 'tiktok'
+  return (
+    <SmartLink
+      href={p.url}
+      style={{ '--pc': pf.color, '--ring': pf.ring }}
+      className="group relative flex w-[80%] shrink-0 snap-start flex-col rounded-[18px] p-[1.5px] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_-22px_var(--pc)] sm:w-[calc((100%-16px)/2)] lg:w-[calc((100%-48px)/4)]"
+    >
+      {/* border: grey → the app's colour / gradient */}
+      <span aria-hidden="true" className="absolute inset-0 rounded-[18px] bg-[#e6eeec]" />
+      <span aria-hidden="true" className="absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: 'var(--ring)' }} />
+
+      <div className="relative flex flex-1 flex-col overflow-hidden rounded-[16.5px] bg-white">
+        {/* header: page + date + app icon */}
+        <div className="flex items-center gap-2.5 px-3.5 pb-2 pt-3.5">
+          <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-1 ring-[#e3ebe9]">
+            <img src="/images/logo-color.webp" alt="" className="size-7 object-contain" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13px] font-bold text-ink transition-colors group-hover:text-[var(--pc)]">{page}</span>
+            <span className="block truncate text-[11px] text-muted">{p.date}</span>
+          </span>
+          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--pc)_12%,white)] text-[var(--pc)] transition duration-300 group-hover:bg-[var(--pc)] group-hover:text-white">
+            <BrandIcon platform={p.platform} className="size-3.5" />
+          </span>
+        </div>
+
+        {/* title + text */}
+        <div className="px-3.5 pb-3">
+          <p className="line-clamp-1 text-[13.5px] font-extrabold leading-snug text-ink">{p.title || p.text}</p>
+          {p.title && <p className="mt-0.5 line-clamp-2 min-h-[2.8em] text-[12.5px] leading-[1.4] text-[#55625f]">{p.text}</p>}
+        </div>
+
+        {/* picture */}
+        <div className="relative mx-3.5 aspect-[4/3] overflow-hidden rounded-[12px] bg-brand-50">
+          <SmartImage src={p.image} alt="" className="h-full w-full transition duration-700 group-hover:scale-105" />
+          {video && (
+            <span
+              className={`absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 shadow-lg transition duration-300 group-hover:scale-110 group-hover:bg-[var(--pc)] group-hover:text-white ${
+                p.platform === 'youtube' ? 'text-[#ff0000]' : 'text-[#111]'
+              }`}
+            >
+              <Play className="ml-0.5 size-[18px]" fill="currentColor" />
+            </span>
+          )}
+          {p.platform === 'instagram' && (
+            <Heart
+              aria-hidden="true"
+              className="absolute left-1/2 top-1/2 size-14 -translate-x-1/2 -translate-y-1/2 scale-0 fill-white text-white opacity-0 drop-shadow-[0_4px_12px_rgb(214_41_118/0.7)] transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-100 group-hover:opacity-100"
+            />
+          )}
+          {p.platform === 'facebook' && (
+            <span className="absolute bottom-2.5 left-2.5 grid size-9 translate-y-2 scale-50 place-items-center rounded-full bg-[#1877f2] text-white opacity-0 shadow-lg ring-2 ring-white transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100">
+              <ThumbsUp className="size-4" fill="currentColor" />
+            </span>
+          )}
+          {p.platform === 'tiktok' && (
+            // TikTok "glitch": cyan + pink copies of the frame slide out on hover
+            <>
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[12px] ring-2 ring-[#25f4ee] opacity-0 transition duration-300 group-hover:-translate-x-[3px] group-hover:opacity-100" />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[12px] ring-2 ring-[#fe2c55] opacity-0 transition duration-300 group-hover:translate-x-[3px] group-hover:opacity-100" />
+            </>
+          )}
+        </div>
+
+        {/* counts + link to the post */}
+        <div className="mt-auto flex items-center gap-3 px-3.5 pb-3 pt-2.5 text-[11.5px] font-semibold text-muted">
+          {p.views != null && (
+            <span className="flex items-center gap-1">
+              <Eye className="size-3.5" strokeWidth={2.2} /> {compact(p.views)}
+            </span>
+          )}
+          {p.likes != null && (
+            <span className="flex items-center gap-1">
+              {p.platform === 'facebook' ? <ThumbsUp className="size-3.5" strokeWidth={2.2} /> : <Heart className="size-3.5" strokeWidth={2.2} />}
+              {compact(p.likes)}
+            </span>
+          )}
+          {p.comments != null && (
+            <span className="flex items-center gap-1">
+              <MessageCircle className="size-3.5" strokeWidth={2.2} /> {compact(p.comments)}
+            </span>
+          )}
+          <span className="ml-auto flex items-center gap-1 whitespace-nowrap text-[var(--pc)] opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 sm:-translate-x-1">
+            {t(pf.cta)}
+            <ArrowRight className="size-3.5" strokeWidth={2.4} />
+          </span>
+        </div>
+      </div>
+    </SmartLink>
+  )
+}
+
+export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
   const { t } = useI18n()
   const [tab, setTab] = useState('all')
   const platforms = [...new Set(posts.map((p) => p.platform))]
   const shown = tab === 'all' ? posts : posts.filter((p) => p.platform === tab)
 
+  // the row slides sideways (4 posts per view on desktop) – arrows next to the title
+  const row = useRef(null)
+  const [edge, setEdge] = useState({ start: true, end: false })
+  useEffect(() => {
+    const el = row.current
+    if (!el) return
+    el.scrollTo({ left: 0 })
+    const check = () => setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 })
+    check()
+    el.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      el.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [tab, posts.length])
+  const slide = (dir) => {
+    const el = row.current
+    const card = el?.firstElementChild
+    if (card) el.scrollBy({ left: dir * (card.offsetWidth + 16), behavior: 'smooth' })
+  }
+
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="Follow us on social media" title={t('ติดตามเราบนโซเชียลมีเดีย')} />
+      <HomeTitle eyebrow="Follow us on social media" title={t('ติดตามเราบนโซเชียลมีเดีย')}>
+        <div className="mb-1 ml-auto hidden gap-1.5 sm:flex">
+          {[
+            [ChevronLeft, t('ก่อนหน้า'), -1, edge.start],
+            [ChevronRight, t('ถัดไป'), 1, edge.end],
+          ].map(([Icon, label, dir, off]) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => slide(dir)}
+              aria-label={label}
+              className={`grid size-9 place-items-center rounded-full border border-[#d9e4e1] text-brand-800 transition ${
+                off ? 'opacity-35' : 'hover:border-brand-600 hover:bg-brand-600 hover:text-white'
+              }`}
+            >
+              <Icon className="size-4" strokeWidth={2.4} />
+            </button>
+          ))}
+        </div>
+      </HomeTitle>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" className="flex flex-wrap gap-1.5">
@@ -136,26 +311,11 @@ export function SocialFeed({ links = [], posts = [] }) {
         </div>
       </div>
 
-      {/* one row of 6 on desktop (like an Instagram strip), 3 per row on tablet, 2 on phones */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-        {shown.map((p) => {
-          const pf = PLATFORM[p.platform] || {}
-          return (
-            <SmartLink key={p.id} href={p.url} className="group relative block aspect-square overflow-hidden rounded-[16px] bg-brand-50 motion-safe:animate-[card-in_0.4s_ease-out]">
-              <SmartImage src={p.image} alt="" className="h-full w-full transition duration-700 group-hover:scale-105" />
-              <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
-              <span className="absolute left-3 top-3 grid size-8 place-items-center rounded-full text-white shadow" style={{ backgroundColor: pf.color }}>
-                <BrandIcon platform={p.platform} className="size-4" />
-              </span>
-              {p.platform === 'youtube' && (
-                <span className="absolute left-1/2 top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#ff0000] shadow-lg transition group-hover:scale-110">
-                  <Play className="ml-0.5 size-5" fill="currentColor" />
-                </span>
-              )}
-              <p className="absolute inset-x-0 bottom-0 line-clamp-2 p-3 text-[12.5px] font-semibold leading-snug text-white sm:p-4 sm:text-[13.5px] lg:p-3 lg:text-[12px]">{p.text}</p>
-            </SmartLink>
-          )
-        })}
+      {/* post cards: 4 per view on desktop, 2 on tablet, 1 + a peek on phones; arrows / swipe for more */}
+      <div ref={row} className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-4 pt-1 [scrollbar-width:none]">
+        {shown.map((p) => (
+          <PostCard key={p.id} post={p} page={page} />
+        ))}
       </div>
     </section>
   )

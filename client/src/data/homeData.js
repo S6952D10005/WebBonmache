@@ -180,13 +180,18 @@ export const HOME = {
       { platform: 'instagram', url: 'https://www.instagram.com/' },
       { platform: 'tiktok', url: 'https://www.tiktok.com/' },
     ],
+    /*
+     * โพสต์ตัวอย่าง (ใส่เองจนกว่าจะต่อกับเพจจริง)
+     *   title = หัวข้อโพสต์ (ตัวหนา) · text = เนื้อความย่อ · date = วันเวลาที่โพสต์
+     *   likes / comments / views = ตัวเลขใต้โพสต์ (ใส่เท่าที่มี)
+     */
     posts: [
-      { id: 1, platform: 'facebook', text: 'เช้านี้ของสดมาเต็มตลาด แวะมาเลือกกันได้ตั้งแต่ 8 โมง', image: '/images/week-1.jpg', url: 'https://www.facebook.com/' },
-      { id: 2, platform: 'youtube', text: 'พาเดินตลาด Bon Marché ใน 5 นาที', image: '/images/hero-banner.webp', url: 'https://www.youtube.com/' },
-      { id: 3, platform: 'instagram', text: 'มุมถ่ายรูปใหม่ริมสระน้ำ', image: '/images/visit-banner.webp', url: 'https://www.instagram.com/' },
-      { id: 4, platform: 'facebook', text: 'Taste of Thailand เริ่มเสาร์นี้!', image: '/images/week-4.jpg', url: 'https://www.facebook.com/' },
-      { id: 5, platform: 'tiktok', text: 'สมูทตี้แก้วละ 39 บาท ที่ Green Day', image: '/images/shop-3.jpg', url: 'https://www.tiktok.com/' },
-      { id: 6, platform: 'youtube', text: 'สูตรข้าวมันไก่ต้นตำรับ', image: '/images/shop-1.jpg', url: 'https://www.youtube.com/' },
+      { id: 1, platform: 'facebook', title: 'เช้านี้ของสดมาเต็มตลาด 🥬', text: 'ผักสด ผลไม้ อาหารทะเล ส่งตรงจากเกษตรกร แวะมาเลือกกันได้ตั้งแต่ 8 โมง จอดรถฟรี 2 ชม.', date: '3 พ.ย. 2569 · 10:00', likes: 1240, comments: 86, image: '/images/week-1.jpg', url: 'https://www.facebook.com/' },
+      { id: 2, platform: 'youtube', title: 'พาเดินตลาด Bon Marché ใน 5 นาที', text: 'รวมร้านเด็ด มุมถ่ายรูป และของกินห้ามพลาด ดูจบรู้เลยว่าต้องไปโซนไหนก่อน', date: '2 พ.ย. 2569 · 20:00', views: 18400, likes: 932, image: '/images/hero-banner.webp', url: 'https://www.youtube.com/' },
+      { id: 3, platform: 'instagram', title: 'มุมถ่ายรูปใหม่ริมสระน้ำ 📸', text: 'แสงสวยช่วงเย็น 4–6 โมง แท็ก #BonMarche มาให้เราดูด้วยนะ', date: '31 ต.ค. 2569 · 13:00', likes: 3105, comments: 142, image: '/images/visit-banner.webp', url: 'https://www.instagram.com/' },
+      { id: 4, platform: 'facebook', title: 'Taste of Thailand เริ่มเสาร์นี้!', text: 'เทศกาลอาหารไทยจากทั่วประเทศ กว่า 40 ร้าน 15–30 พ.ย. ลานกิจกรรม อาคาร A', date: '30 ต.ค. 2569 · 09:00', likes: 2018, comments: 210, image: '/images/week-4.jpg', url: 'https://www.facebook.com/' },
+      { id: 5, platform: 'tiktok', title: 'สมูทตี้แก้วละ 39 บาท 🍹', text: 'ลองเมนูใหม่ Green Day ผักผลไม้ปั่นสด ไม่ใส่น้ำตาล อร่อยจนต้องกดซ้ำ', date: '29 ต.ค. 2569 · 18:30', views: 56200, likes: 4870, image: '/images/shop-3.jpg', url: 'https://www.tiktok.com/' },
+      { id: 6, platform: 'youtube', title: 'สูตรข้าวมันไก่ต้นตำรับ', text: 'เปิดครัวร้านข้าวมันไก่ในตลาด ต้มไก่ หุงข้าว และน้ำจิ้มเต้าเจี้ยวสูตรเด็ด', date: '27 ต.ค. 2569 · 19:00', views: 9800, likes: 611, image: '/images/shop-1.jpg', url: 'https://www.youtube.com/' },
     ],
   },
 }
