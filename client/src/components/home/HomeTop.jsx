@@ -61,6 +61,7 @@ export function HeadlineTab({ tabs = [] }) {
         {tabs.map((x) => {
           const on = open && x.id === current
           const Icon = TAB_ICONS[x.icon] || Sparkles
+          // every topic has its own colour (homeData: color) – icon, tint, title, underline
           return (
             <button
               key={x.id}
@@ -71,37 +72,48 @@ export function HeadlineTab({ tabs = [] }) {
               aria-controls="headline-panel"
               onPointerEnter={(e) => mouse(e) && show(x.id)}
               onClick={(e) => (e.nativeEvent.pointerType === 'mouse' ? show(x.id) : toggle(x.id))}
+              style={{ '--c': x.color || '#138377' }}
               className="group relative flex flex-col items-center justify-center gap-1.5 px-1 py-1.5 text-center outline-none sm:flex-row sm:gap-3 sm:px-3 sm:py-2 sm:text-left"
             >
-              {/* hover / open background */}
+              {/* hover / open background – a soft wash of the topic colour */}
               <span
                 aria-hidden="true"
-                className={`absolute inset-x-1 inset-y-0 -z-0 rounded-[14px] transition duration-300 sm:inset-x-2 ${
-                  on ? 'bg-brand-50' : 'bg-transparent group-hover:bg-[#f4f8f7] group-focus-visible:bg-[#f4f8f7]'
+                className={`absolute inset-x-1 inset-y-0 rounded-[14px] transition duration-300 sm:inset-x-2 ${
+                  on
+                    ? 'bg-[color-mix(in_srgb,var(--c)_10%,white)]'
+                    : 'bg-transparent group-hover:bg-[color-mix(in_srgb,var(--c)_8%,white)] group-focus-visible:bg-[color-mix(in_srgb,var(--c)_8%,white)]'
                 }`}
               />
               <span
-                className={`relative grid size-10 shrink-0 place-items-center rounded-full transition duration-300 sm:size-11 ${
-                  on ? 'bg-brand-600 text-white shadow-[0_8px_16px_-8px_rgb(15_111_102/0.9)]' : 'bg-brand-50 text-brand-600 group-hover:bg-brand-100'
+                className={`relative grid size-10 shrink-0 place-items-center rounded-full transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:size-11 ${
+                  on
+                    ? 'rotate-[-6deg] scale-110 bg-[var(--c)] text-white shadow-[0_8px_18px_-8px_var(--c)]'
+                    : 'bg-[color-mix(in_srgb,var(--c)_14%,white)] text-[var(--c)] group-hover:rotate-[-6deg] group-hover:scale-110 group-hover:bg-[var(--c)] group-hover:text-white group-hover:shadow-[0_8px_18px_-8px_var(--c)]'
                 }`}
               >
                 <Icon className="size-[19px] sm:size-5" strokeWidth={2} />
               </span>
               <span className="relative min-w-0">
                 <span className="flex items-center justify-center gap-1 sm:justify-start">
-                  <span className={`text-[11.5px] font-bold leading-tight sm:text-[15px] ${on ? 'text-brand-700' : 'text-ink'}`}>{x.label}</span>
+                  <span
+                    className={`text-[11.5px] font-bold leading-tight transition-colors duration-300 sm:text-[15px] ${
+                      on ? 'text-[var(--c)]' : 'text-ink group-hover:text-[var(--c)]'
+                    }`}
+                  >
+                    {x.label}
+                  </span>
                   <ChevronDown
-                    className={`hidden size-4 shrink-0 transition-transform duration-300 sm:block ${on ? 'rotate-180 text-brand-600' : 'text-[#9fb0ad] group-hover:text-brand-600'}`}
+                    className={`hidden size-4 shrink-0 transition duration-300 sm:block ${on ? 'rotate-180 text-[var(--c)]' : 'text-[#9fb0ad] group-hover:text-[var(--c)]'}`}
                     strokeWidth={2.4}
                   />
                 </span>
                 {x.hint && <span className="mt-0.5 hidden truncate text-[12px] text-muted sm:block">{x.hint}</span>}
               </span>
-              {/* little bar under the open topic */}
+              {/* bar in the topic colour under the open / pointed topic */}
               <span
                 aria-hidden="true"
-                className={`absolute -bottom-[7px] left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-500 to-[#f37021] transition-all duration-300 sm:-bottom-[9px] ${
-                  on ? 'w-12 opacity-100' : 'w-0 opacity-0'
+                className={`absolute -bottom-[7px] left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-[var(--c)] transition-all duration-300 sm:-bottom-[9px] ${
+                  on ? 'w-12 opacity-100' : 'w-0 opacity-0 group-hover:w-8 group-hover:opacity-60'
                 }`}
               />
             </button>
@@ -120,7 +132,10 @@ export function HeadlineTab({ tabs = [] }) {
           open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
         }`}
       >
-        <div className="relative rounded-[20px] border border-[#e6eeec] bg-white p-4 shadow-[0_28px_60px_-28px_rgb(12_80_72/0.55)] sm:p-6">
+        <div
+          style={{ '--c': tab.color || '#138377' }}
+          className="relative rounded-[20px] border border-[#e6eeec] bg-white p-4 shadow-[0_28px_60px_-28px_rgb(12_80_72/0.55)] transition-[border-color] duration-300 sm:p-6"
+        >
           {/* pointer towards the open topic */}
           <span
             aria-hidden="true"
@@ -129,7 +144,7 @@ export function HeadlineTab({ tabs = [] }) {
           />
           <div key={tab.id} className="grid gap-5 motion-safe:animate-[card-in_0.35s_ease-out] sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-6">
             <div className="flex flex-col justify-center">
-              <p className="text-[18px] font-extrabold text-brand-800">{tab.label}</p>
+              <p className="text-[18px] font-extrabold text-[var(--c)]">{tab.label}</p>
               <p className="mt-1 text-[13px] leading-relaxed text-muted">{tab.intro}</p>
               <ul className="mt-3 space-y-1">
                 {tab.links.map((l) => (
@@ -137,11 +152,11 @@ export function HeadlineTab({ tabs = [] }) {
                     <SmartLink
                       href={l.url}
                       onClick={() => setOpen(false)}
-                      className="group -mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13.5px] font-semibold text-[#2b3a38] transition hover:bg-brand-50 hover:text-brand-700"
+                      className="group -mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13.5px] font-semibold text-[#2b3a38] transition hover:bg-[color-mix(in_srgb,var(--c)_9%,white)] hover:text-[var(--c)]"
                     >
-                      <span className="size-1.5 shrink-0 rounded-full bg-[#f37021]" />
+                      <span className="size-1.5 shrink-0 rounded-full bg-[var(--c)]" />
                       {l.label}
-                      <ArrowRight className="ml-auto size-3.5 text-brand-600 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" strokeWidth={2.4} />
+                      <ArrowRight className="ml-auto size-3.5 text-[var(--c)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" strokeWidth={2.4} />
                     </SmartLink>
                   </li>
                 ))}
@@ -160,7 +175,7 @@ export function HeadlineTab({ tabs = [] }) {
                   </div>
                   <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                     <span className="truncate text-[13px] font-semibold text-ink">{c.title}</span>
-                    <span className="hidden shrink-0 items-center gap-1 text-[11.5px] font-semibold text-brand-700 sm:flex">
+                    <span className="hidden shrink-0 items-center gap-1 text-[11.5px] font-semibold text-[var(--c)] sm:flex">
                       {t('ดูเพิ่มเติม')}
                       <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" strokeWidth={2.4} />
                     </span>

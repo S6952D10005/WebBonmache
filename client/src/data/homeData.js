@@ -17,6 +17,7 @@ export const HOME = {
       {
         id: 'food',
         icon: 'Utensils',
+        color: '#f37021', // topic colour (hover, icon, underline)
         label: 'ร้านอาหารแนะนำ',
         hint: 'ร้านเด็ดประจำสัปดาห์', // short line under the label
         intro: 'คัดร้านเด็ดประจำสัปดาห์ ทั้งของคาว ของหวาน และเครื่องดื่ม',
@@ -33,6 +34,7 @@ export const HOME = {
       {
         id: 'shopping',
         icon: 'ShoppingBag',
+        color: '#ec1c8c',
         label: 'ช้อปปิ้ง',
         hint: 'แฟชั่น · ของใช้ · สุขภาพ',
         intro: 'แฟชั่น ของใช้ และสินค้าสุขภาพ ครบในที่เดียว',
@@ -49,6 +51,7 @@ export const HOME = {
       {
         id: 'services',
         icon: 'Store',
+        color: '#00a3e0',
         label: 'ร้านค้าและบริการ',
         hint: 'แผนผัง · ที่จอดรถ · เช่าพื้นที่',
         intro: 'บริการที่จอดรถ จุดรับส่ง และสิ่งอำนวยความสะดวกในตลาด',
