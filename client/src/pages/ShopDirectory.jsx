@@ -467,7 +467,7 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
               </span>
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 px-1 text-[12px] text-[#4d5f5c]">
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 px-1 text-[12px] text-[#4d5f5c]">
               <span>
                 <b className="text-[15px] font-extrabold text-brand-700">{shops.length}</b> {t('ร้านค้า')}
               </span>
@@ -477,9 +477,11 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
               <span>
                 <b className="text-[15px] font-extrabold text-brand-700">{zones.length}</b> {t('โซน')}
               </span>
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5">
                 <span className="size-1.5 animate-pulse rounded-full bg-[#1fb36b]" />
-                <b className="text-[15px] font-extrabold text-[#13804f]">{openCount}</b> {t('ร้านเปิดอยู่ตอนนี้')}
+                <span>
+                  <b className="text-[15px] font-extrabold text-[#13804f]">{openCount}</b> {t('ร้านเปิดอยู่ตอนนี้')}
+                </span>
               </span>
             </div>
           </div>

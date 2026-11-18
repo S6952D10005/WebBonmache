@@ -10,21 +10,30 @@ import LeasingBanner from './components/LeasingBanner'
 import Footer from './components/Footer'
 import SmartLink from './components/SmartLink'
 import ShopDirectory from './pages/ShopDirectory'
+import Home from './pages/Home'
 import { BackToTop, ScrollProgress, useScrollReveal } from './components/ScrollFx'
 import { defaultData } from './data/defaultData'
 import { useI18n } from './i18n'
+
+/*
+ * "/"     = start page (หน้าเริ่มต้น): what opens first – not in the menu
+ * "/home" = home page (หน้าแรก): what the menu's "หน้าแรก" and the logo open
+ */
+export const HOME_URL = '/home'
+// older menu rows still point "หน้าแรก" at "#" (top of the start page) → send them to the home page
+const toHome = (list) => list.map((m) => (m.url === '#' ? { ...m, url: HOME_URL } : m))
 
 /** Merge API data over the defaults so the page always renders. */
 function merge(api) {
   const pick = (arr, fallback) => (Array.isArray(arr) && arr.length ? arr : fallback)
   return {
     settings: { ...defaultData.settings, ...(api?.settings || {}) },
-    menus: pick(api?.menus, defaultData.menus),
+    menus: toHome(pick(api?.menus, defaultData.menus)),
     highlights: pick(api?.highlights, defaultData.highlights),
     categories: pick(api?.categories, defaultData.categories),
     shops: pick(api?.shops, defaultData.shops),
     visitInfo: pick(api?.visitInfo, defaultData.visitInfo),
-    footerLinks: pick(api?.footerLinks, defaultData.footerLinks),
+    footerLinks: toHome(pick(api?.footerLinks, defaultData.footerLinks)),
   }
 }
 
@@ -92,7 +101,7 @@ function NotFound() {
 }
 
 export default function App() {
-  const [data, setData] = useState(defaultData)
+  const [data, setData] = useState(() => merge(null))
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -125,6 +134,7 @@ export default function App() {
         <div key={pathname} className={hasViewTransitions ? '' : 'animate-page-enter'}>
           <Routes>
             <Route path="/" element={<HomePage data={view} />} />
+            <Route path={HOME_URL} element={<Home settings={settings} />} />
             <Route path="/shops" element={<ShopDirectory settings={settings} categories={categories} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

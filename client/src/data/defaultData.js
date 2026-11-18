@@ -41,7 +41,7 @@ export const defaultData = {
 
   // footer link columns (group: quick | service | legal)
   footerLinks: [
-    { id: 1, group_key: 'quick', label: 'หน้าแรก', url: '#' },
+    { id: 1, group_key: 'quick', label: 'หน้าแรก', url: '/home' },
     { id: 2, group_key: 'quick', label: 'เกี่ยวกับเรา', url: '#about' },
     { id: 3, group_key: 'quick', label: 'ค้นหาร้านค้า', url: '/shops' },
     { id: 4, group_key: 'quick', label: 'โปรโมชั่น', url: '#events' },
@@ -61,7 +61,7 @@ export const defaultData = {
 
   // main menu; `children` = dropdown items (same as nav_menus in the database)
   menus: [
-    { id: 1, label: 'หน้าแรก', url: '#', has_dropdown: 0 },
+    { id: 1, label: 'หน้าแรก', url: '/home', has_dropdown: 0 },
     {
       id: 4,
       label: 'ร่วมธุรกิจกับเรา',
