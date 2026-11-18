@@ -20,12 +20,12 @@ export function Awards({ items = [] }) {
           {items.map((a) => {
             const Icon = AWARD_ICONS[a.icon] || Award
             return (
-              // phones: compact row (icon left) · tablet / desktop: centred card
+              // phones: compact row (icon left) · tablet / desktop: centred card – static, no hover effect
               <div
                 key={a.id}
-                className="group flex items-center gap-4 rounded-[18px] border border-[#efe3c8] bg-white px-4 py-4 transition hover:-translate-y-1 hover:shadow-[0_16px_32px_-20px_rgb(150_110_30/0.45)] sm:block sm:px-5 sm:py-7 sm:text-center"
+                className="flex items-center gap-4 rounded-[18px] border border-[#efe3c8] bg-white px-4 py-4 sm:block sm:px-5 sm:py-7 sm:text-center"
               >
-                <span className="grid size-12 shrink-0 place-items-center rounded-full border border-[#ecd9ad] bg-[#fdf6e6] text-[#b8862b] transition group-hover:bg-[#b8862b] group-hover:text-white sm:mx-auto sm:size-16">
+                <span className="grid size-12 shrink-0 place-items-center rounded-full border border-[#ecd9ad] bg-[#fdf6e6] text-[#b8862b] sm:mx-auto sm:size-16">
                   <Icon className="size-6 sm:size-7" strokeWidth={1.7} />
                 </span>
                 <div className="min-w-0">
