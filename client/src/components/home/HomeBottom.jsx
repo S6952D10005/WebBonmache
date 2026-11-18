@@ -278,6 +278,11 @@ export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
         <div role="tablist" className="flex flex-wrap gap-1.5">
           {['all', ...platforms].map((p) => {
             const on = tab === p
+            const pf = PLATFORM[p]
+            // each app's button uses that app's colour: hover = tinted, selected = filled
+            // (Instagram / TikTok filled with their gradient); "ทั้งหมด" keeps the brand green
+            const c = pf?.color || '#138377'
+            const fill = pf?.ring || c
             return (
               <button
                 key={p}
@@ -285,12 +290,19 @@ export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
                 role="tab"
                 aria-selected={on}
                 onClick={() => setTab(p)}
-                className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition ${
-                  on ? 'border-brand-600 bg-brand-600 text-white' : 'border-[#d9e4e1] text-[#3d5552] hover:border-brand-600 hover:text-brand-700'
+                style={{ '--pc': c, background: on ? fill : undefined }}
+                className={`group/tab flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition duration-300 ${
+                  on
+                    ? `border-transparent text-white shadow-[0_8px_18px_-10px_var(--pc)] ${p === 'tiktok' ? '[text-shadow:-1px_0_#25f4ee,1px_0_#fe2c55]' : ''}`
+                    : 'border-[#d9e4e1] text-[#3d5552] hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--pc)_45%,white)] hover:bg-[color-mix(in_srgb,var(--pc)_8%,white)] hover:text-[var(--pc)] hover:shadow-[0_6px_14px_-10px_var(--pc)]'
                 }`}
               >
-                {p !== 'all' && <BrandIcon platform={p} className="size-3.5" />}
-                {p === 'all' ? t('ทั้งหมด') : PLATFORM[p]?.name}
+                {pf && (
+                  <span className={`transition duration-300 ${on ? '' : 'group-hover/tab:scale-125 group-hover/tab:rotate-[-8deg]'}`}>
+                    <BrandIcon platform={p} className="size-3.5" />
+                  </span>
+                )}
+                {p === 'all' ? t('ทั้งหมด') : pf?.name}
               </button>
             )
           })}
