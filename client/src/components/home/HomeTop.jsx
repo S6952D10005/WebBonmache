@@ -241,7 +241,7 @@ export function HeroSlider({ slides = [] }) {
               key={s.id}
               aria-hidden={!on}
               inert={!on}
-              className={`[grid-area:1/1] transition-opacity duration-700 ${on ? 'z-[1] opacity-100' : 'opacity-0'}`}
+              className={`[grid-area:1/1] transition-opacity ${on ? 'z-[1] opacity-100 duration-700' : 'opacity-0 duration-500'}`}
             >
               {s.layout === 'banner' ? <BannerSlide slide={s} active={on} /> : <SplitSlide slide={s} active={on} />}
             </div>
@@ -260,7 +260,8 @@ export function HeroSlider({ slides = [] }) {
           >
             <ChevronLeft className="size-4" strokeWidth={2.4} />
           </button>
-          <div className="flex gap-1.5 rounded-full bg-white/70 px-2 py-1.5 backdrop-blur sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+          {/* dots sit on a small white pill so they show on light and dark slides */}
+          <div className="flex gap-1.5 rounded-full bg-white/85 px-2 py-1.5 shadow-sm backdrop-blur">
             {slides.map((s, i) => (
               <button
                 key={s.id}
@@ -268,7 +269,7 @@ export function HeroSlider({ slides = [] }) {
                 onClick={() => go(i)}
                 aria-label={t('สไลด์ {n}', { n: i + 1 })}
                 aria-current={i === index}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? 'w-7 bg-brand-600' : 'w-1.5 bg-brand-800/25 hover:bg-brand-800/45'}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? 'w-7 bg-brand-600' : 'w-1.5 bg-brand-800/30 hover:bg-brand-800/55'}`}
               />
             ))}
           </div>
@@ -286,11 +287,17 @@ export function HeroSlider({ slides = [] }) {
   )
 }
 
+/**
+ * Text of a slide: the old slide's text leaves fast, the new slide's text comes in
+ * only after it (delay) – so two texts never show on top of each other mid-change.
+ */
+const textFx = (active) => (active ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-2 opacity-0 !duration-200')
+
 function SplitSlide({ slide: s, active }) {
   return (
-    <div className="grid h-full lg:min-h-[420px] lg:grid-cols-[5fr_7fr]">
+    <div className="grid h-full bg-[#f4f6f3] lg:min-h-[420px] lg:grid-cols-[5fr_7fr]">
       {/* bottom padding leaves room for the slide controls */}
-      <div className="order-2 flex flex-col justify-center px-6 pb-12 pt-6 sm:px-10 sm:pb-20 lg:order-1 lg:pb-24 lg:pl-12 lg:pt-12">
+      <div className={`order-2 flex flex-col justify-center px-6 pb-12 pt-6 transition duration-500 sm:px-10 sm:pb-20 lg:order-1 lg:pb-24 lg:pl-12 lg:pt-12 ${textFx(active)}`}>
         {s.eyebrow && <p className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-[#f37021]">{s.eyebrow}</p>}
         <h2
           className={`mt-2 text-[24px] font-extrabold leading-[1.2] text-brand-800 transition-all delay-150 duration-700 sm:text-[30px] ${
@@ -332,7 +339,7 @@ function BannerSlide({ slide: s, active }) {
       {s.title && (
         <>
           <div className="absolute inset-0 bg-gradient-to-r from-[#06302c]/80 via-[#06302c]/35 to-transparent" />
-          <div className="relative flex h-full min-h-[300px] max-w-[520px] flex-col justify-center px-6 pb-12 pt-8 sm:px-10 sm:pb-20 lg:min-h-[420px] lg:pb-24 lg:pl-12">
+          <div className={`relative flex h-full min-h-[300px] max-w-[520px] flex-col justify-center px-6 pb-12 pt-8 transition duration-500 sm:px-10 sm:pb-20 lg:min-h-[420px] lg:pb-24 lg:pl-12 ${textFx(active)}`}>
             <h2
               className={`text-[28px] font-extrabold leading-[1.15] text-white transition-all delay-150 duration-700 sm:text-[38px] ${
                 active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
