@@ -89,9 +89,10 @@ export function Happening({ items = [] }) {
         </div>
       </HomeTitle>
 
-      <div ref={row} className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pb-3 [scrollbar-width:none]">
+      {/* exactly 4 cards side by side on desktop (2 on tablet) – no half card at the edge; the arrows page through the rest */}
+      <div ref={row} className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none]">
         {items.map((h) => (
-          <SmartLink key={h.id} href={h.url} className="group w-[230px] shrink-0 snap-start sm:w-[260px]">
+          <SmartLink key={h.id} href={h.url} className="group w-[72%] shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-brand-50">
               <SmartImage src={h.image} alt={h.title} className="h-full w-full transition duration-700 group-hover:scale-105" />
               <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-brand-700 shadow-sm">
