@@ -114,10 +114,10 @@ export const HOME = {
 
   /* ---------- Happening (ไฮไลต์) ---------- */
   happening: [
-    { id: 1, tag: 'ไฮไลต์', title: 'Bon Marché Fresh Morning', date: '1 – 30 พ.ย. 2569', image: '/images/week-1.jpg', url: '#' },
-    { id: 2, tag: 'เทศกาล', title: 'Taste of Thailand เทศกาลอาหารไทย', date: '15 – 30 พ.ย. 2569', image: '/images/week-4.jpg', url: '#' },
-    { id: 3, tag: 'คาเฟ่', title: 'Bon Cafe เมนูใหม่ต้อนรับหน้าหนาว', date: 'ตลอดเดือนพฤศจิกายน', image: '/images/week-2.jpg', url: '#' },
-    { id: 4, tag: 'สุขภาพ', title: 'Green Corner ตลาดผักอินทรีย์', date: 'ทุกวันเสาร์', image: '/images/week-3.jpg', url: '#' },
+    { id: 1, tag: 'ไฮไลต์', title: 'Bon Marché Fresh Morning', date: '1 – 30 พ.ย. 2569', image: '/images/happening-1.jpg', url: '#' },
+    { id: 2, tag: 'เทศกาล', title: 'Taste of Thailand เทศกาลอาหารไทย', date: '15 – 30 พ.ย. 2569', image: '/images/happening-2.jpg', url: '#' },
+    { id: 3, tag: 'คาเฟ่', title: 'Bon Cafe เมนูใหม่ต้อนรับหน้าหนาว', date: 'ตลอดเดือนพฤศจิกายน', image: '/images/happening-3.jpg', url: '#' },
+    { id: 4, tag: 'สุขภาพ', title: 'Green Corner ตลาดผักอินทรีย์', date: 'ทุกวันเสาร์', image: '/images/happening-4.jpg', url: '#' },
     { id: 5, tag: 'ช้อปปิ้ง', title: 'Wellness Shop ลดสูงสุด 30%', date: '20 – 26 พ.ย. 2569', image: '/images/week-5.jpg', url: '#' },
   ],
 

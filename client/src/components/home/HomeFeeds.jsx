@@ -93,16 +93,25 @@ export function Happening({ items = [] }) {
       <div ref={row} className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none]">
         {items.map((h) => (
           <SmartLink key={h.id} href={h.url} className="group w-[72%] shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-brand-50">
+            {/* poster-style card: dark glass tag, light sweep + pink→orange glow on hover */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[#1b1416] ring-1 ring-black/5 transition duration-500 group-hover:shadow-[0_22px_40px_-22px_rgb(236_28_140/0.75)]">
               <SmartImage src={h.image} alt={h.title} className="h-full w-full transition duration-700 group-hover:scale-105" />
-              <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-brand-700 shadow-sm">
+              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent" />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:left-[120%] group-hover:opacity-100"
+              />
+              <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/35 py-1 pl-2 pr-3 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-white ring-1 ring-white/30 backdrop-blur-md">
+                <span className="size-1.5 rounded-full bg-gradient-to-r from-[#ec1c8c] to-[#f7931e] shadow-[0_0_8px_#ec1c8c]" />
                 {h.tag}
               </span>
             </div>
-            <h3 className="mt-3 line-clamp-2 text-[15px] font-bold leading-snug text-ink transition group-hover:text-brand-700">{h.title}</h3>
-            <div className="mt-1.5">
-              <DateLine>{h.date}</DateLine>
-            </div>
+            <h3 className="mt-3.5 line-clamp-2 text-[15.5px] font-extrabold leading-snug tracking-[-0.01em] text-ink transition group-hover:text-[#ec1c8c]">{h.title}</h3>
+            {/* date: gradient line + gradient text (no calendar icon) */}
+            <p className="mt-2 flex items-center gap-2 text-[12px] font-bold tracking-[0.06em]">
+              <span aria-hidden="true" className="h-[2px] w-5 rounded-full bg-gradient-to-r from-[#ec1c8c] to-[#f7931e] transition-all duration-500 group-hover:w-9" />
+              <span className="bg-gradient-to-r from-[#ec1c8c] to-[#f7931e] bg-clip-text text-transparent">{h.date}</span>
+            </p>
           </SmartLink>
         ))}
       </div>

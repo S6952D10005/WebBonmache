@@ -40,4 +40,10 @@ export default [
   { src: 'Ohter/green day smoothie.png', out: 'images/shop-3.jpg', width: 720, height: 480, quality: 82 },
   { src: 'Ohter/urban.png', out: 'images/shop-4.jpg', width: 720, height: 480, quality: 82 },
   { src: 'Ohter/seafood.png', out: 'images/shop-5.jpg', width: 720, height: 480, quality: 82 },
+
+  // ---------- หน้าแรก: ไฮไลต์ที่ไม่ควรพลาด (การ์ด 1–4, สัดส่วน 4:5) ----------
+  { src: 'highlig/1.jpg', out: 'images/happening-1.jpg', width: 720, height: 900, quality: 82 },
+  { src: 'highlig/2.jpg', out: 'images/happening-2.jpg', width: 720, height: 900, quality: 82 },
+  { src: 'highlig/3.jpg', out: 'images/happening-3.jpg', width: 720, height: 900, quality: 82 },
+  { src: 'highlig/4.jpg', out: 'images/happening-4.jpg', width: 720, height: 900, quality: 82 },
 ]
