@@ -193,20 +193,28 @@ export function Events({ items = [] }) {
   return (
     <section id="events" className="container-bm scroll-mt-24 pt-16 lg:pt-20">
       <HomeTitle eyebrow="All events" title={t('กิจกรรมทั้งหมด')} href="#" />
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* same card size as Happening: a quarter of the content width on desktop */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((e) => (
           <SmartLink key={e.id} href={e.url} className="group">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[18px] bg-brand-50">
+            {/* 4:5 poster card – same look + hover as Happening: dark glass label, light sweep, pink glow */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[#1b1416] ring-1 ring-black/5 transition duration-500 group-hover:shadow-[0_22px_40px_-22px_rgb(236_28_140/0.75)]">
               <SmartImage src={e.image} alt={e.title} className="h-full w-full transition duration-700 group-hover:scale-105" />
-              <span className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 to-transparent" />
-              <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11.5px] font-bold text-brand-800">
-                <CalendarDays className="size-3.5 text-[#f37021]" strokeWidth={2.4} />
+              <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:left-[120%] group-hover:opacity-100"
+              />
+              <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/35 py-1 pl-2 pr-3 text-[11px] font-semibold tracking-[0.06em] text-white ring-1 ring-white/30 backdrop-blur-md">
+                <CalendarDays className="size-3.5 text-[#ff9fd0]" strokeWidth={2.4} />
                 {e.date}
               </span>
             </div>
-            <h3 className="mt-3 line-clamp-2 text-[15.5px] font-bold leading-snug text-ink transition group-hover:text-brand-700">{e.title}</h3>
-            <p className="mt-1 flex items-center gap-1.5 text-[12px] text-muted">
-              <MapPin className="size-3.5 shrink-0 text-brand-500" strokeWidth={2.2} />
+            <h3 className="mt-3.5 line-clamp-2 text-[15.5px] font-extrabold leading-snug tracking-[-0.01em] text-ink transition group-hover:text-[#ec1c8c]">{e.title}</h3>
+            {/* place: gradient pin + text, the dash grows on hover like the Happening date */}
+            <p className="mt-2 flex items-center gap-2 text-[12px] font-semibold text-muted transition group-hover:text-[#3d5552]">
+              <span aria-hidden="true" className="h-[2px] w-5 shrink-0 rounded-full bg-gradient-to-r from-[#ec1c8c] to-[#f7931e] transition-all duration-500 group-hover:w-9" />
+              <MapPin className="size-3.5 shrink-0 text-[#ec1c8c]" strokeWidth={2.2} />
               {e.place}
             </p>
           </SmartLink>

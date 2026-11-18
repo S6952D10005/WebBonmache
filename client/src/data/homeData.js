@@ -142,9 +142,10 @@ export const HOME = {
 
   /* ---------- All events ---------- */
   events: [
-    { id: 1, title: 'Bon Marché Night Market', date: '22 – 23 พ.ย. 2569', place: 'ลานกิจกรรม อาคาร A', image: '/images/week-4.jpg', url: '#' },
-    { id: 2, title: 'เวิร์กช็อปทำขนมไทยกับครอบครัว', date: '29 พ.ย. 2569', place: 'ห้องสัมมนา อาคาร E', image: '/images/week-2.jpg', url: '#' },
-    { id: 3, title: 'ตลาดนัดสินค้าเกษตรอินทรีย์', date: '1 – 7 ธ.ค. 2569', place: 'ลานริมสระน้ำ', image: '/images/week-3.jpg', url: '#' },
+    { id: 1, title: 'Bon Marché Night Market', date: '22 – 23 พ.ย. 2569', place: 'ลานกิจกรรม อาคาร A', image: '/images/event-1.jpg', url: '#' },
+    { id: 2, title: 'เวิร์กช็อปทำขนมไทยกับครอบครัว', date: '29 พ.ย. 2569', place: 'ห้องสัมมนา อาคาร E', image: '/images/event-2.jpg', url: '#' },
+    { id: 3, title: 'ตลาดนัดสินค้าเกษตรอินทรีย์', date: '1 – 7 ธ.ค. 2569', place: 'ลานริมสระน้ำ', image: '/images/event-3.jpg', url: '#' },
+    { id: 4, title: 'ตลาดนัดแฟชั่นมือสองและงานคราฟต์', date: '13 – 14 ธ.ค. 2569', place: 'ลานหน้าอาคาร B&C', image: '/images/event-4.jpg', url: '#' },
   ],
 
   /* ---------- News ---------- */
