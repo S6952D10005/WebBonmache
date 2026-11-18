@@ -105,10 +105,11 @@ export const HOME = {
 
   /* ---------- Quick links (icon = ชื่อไอคอนจาก lucide) ---------- */
   quickLinks: [
-    { label: 'ค้นหาร้านค้า', icon: 'Store', url: '/shops' },
-    { label: 'กิจกรรม', icon: 'CalendarDays', url: '#events' },
-    { label: 'การเดินทาง', icon: 'MapPin', url: '/#visit' },
-    { label: 'เช่าพื้นที่', icon: 'Building', url: '/#leasing' },
+    // color = the card's own colour on hover; hint = small line under the label
+    { label: 'ค้นหาร้านค้า', hint: 'ร้านค้ากว่า 100 ร้าน', icon: 'Store', color: '#ec1c8c', url: '/shops' },
+    { label: 'กิจกรรม', hint: 'อัปเดตทุกสัปดาห์', icon: 'CalendarDays', color: '#f37021', url: '#events' },
+    { label: 'การเดินทาง', hint: 'แผนที่ · ที่จอดรถ', icon: 'MapPin', color: '#00a3e0', url: '/#visit' },
+    { label: 'เช่าพื้นที่', hint: 'เปิดร้านกับเรา', icon: 'Building', color: '#1f9285', url: '/#leasing' },
   ],
 
   /* ---------- Happening (ไฮไลต์) ---------- */

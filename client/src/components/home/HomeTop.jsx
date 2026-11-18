@@ -250,8 +250,8 @@ export function HeroSlider({ slides = [] }) {
       </div>
 
       {count > 1 && (
-        // prev · dots · next – under the text on desktop (above the quick-link bar that overlaps the slide's bottom), centred on phones
-        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 sm:bottom-14 lg:bottom-16 lg:left-12 lg:translate-x-0">
+        // prev · dots · next – under the text on desktop, centred on phones
+        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 sm:bottom-6 lg:bottom-8 lg:left-12 lg:translate-x-0">
           <button
             type="button"
             onClick={() => go(index - 1)}
@@ -289,8 +289,8 @@ export function HeroSlider({ slides = [] }) {
 function SplitSlide({ slide: s, active }) {
   return (
     <div className="grid h-full lg:min-h-[420px] lg:grid-cols-[5fr_7fr]">
-      {/* bottom padding leaves room for the slide controls + the quick-link bar */}
-      <div className="order-2 flex flex-col justify-center px-6 pb-12 pt-6 sm:px-10 sm:pb-24 lg:order-1 lg:pb-28 lg:pl-12 lg:pt-12">
+      {/* bottom padding leaves room for the slide controls */}
+      <div className="order-2 flex flex-col justify-center px-6 pb-12 pt-6 sm:px-10 sm:pb-20 lg:order-1 lg:pb-24 lg:pl-12 lg:pt-12">
         {s.eyebrow && <p className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-[#f37021]">{s.eyebrow}</p>}
         <h2
           className={`mt-2 text-[24px] font-extrabold leading-[1.2] text-brand-800 transition-all delay-150 duration-700 sm:text-[30px] ${
@@ -332,7 +332,7 @@ function BannerSlide({ slide: s, active }) {
       {s.title && (
         <>
           <div className="absolute inset-0 bg-gradient-to-r from-[#06302c]/80 via-[#06302c]/35 to-transparent" />
-          <div className="relative flex h-full min-h-[300px] max-w-[520px] flex-col justify-center px-6 pb-12 pt-8 sm:px-10 sm:pb-24 lg:min-h-[420px] lg:pb-28 lg:pl-12">
+          <div className="relative flex h-full min-h-[300px] max-w-[520px] flex-col justify-center px-6 pb-12 pt-8 sm:px-10 sm:pb-20 lg:min-h-[420px] lg:pb-24 lg:pl-12">
             <h2
               className={`text-[28px] font-extrabold leading-[1.15] text-white transition-all delay-150 duration-700 sm:text-[38px] ${
                 active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
@@ -359,26 +359,38 @@ function BannerSlide({ slide: s, active }) {
 }
 
 /* ======================================================================== */
-/*  Quick links – white bar overlapping the bottom of the slider            */
+/*  Quick links – a row of 4 cards under the slider (not overlapping it).   */
+/*  Each card has its own colour (homeData: color): on hover the card lifts, */
+/*  gets a wash + border of that colour, the icon fills and tilts and the    */
+/*  arrow turns into a filled circle that slides forward.                    */
 /* ======================================================================== */
 export function QuickLinks({ items = [] }) {
   return (
-    <nav className="relative z-10 mx-auto grid max-w-[920px] grid-cols-2 overflow-hidden mt-4 rounded-[18px] border border-[#e6eeec] bg-white shadow-[0_16px_36px_-20px_rgb(12_80_72/0.45)] sm:-mt-8 sm:grid-cols-4">
-      {items.map((q, i) => {
+    <nav className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-4">
+      {items.map((q) => {
         const Icon = ICONS[q.icon] || Store
         return (
           <SmartLink
             key={q.label}
             href={q.url}
-            className={`group flex items-center gap-2.5 px-4 py-3.5 transition hover:bg-brand-50 sm:justify-center ${
-              i % 2 ? 'border-l border-[#eef2f1]' : ''
-            } ${i > 1 ? 'border-t border-[#eef2f1] sm:border-t-0' : ''} ${i === 2 ? 'sm:border-l' : ''}`}
+            style={{ '--c': q.color || '#138377' }}
+            className="group relative flex flex-col items-center gap-2 overflow-hidden rounded-[18px] text-center sm:flex-row sm:gap-3 sm:text-left border border-[#e6eeec] bg-white px-3.5 py-3.5 shadow-[0_6px_18px_-14px_rgb(12_80_72/0.45)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--c)_35%,white)] hover:bg-[color-mix(in_srgb,var(--c)_6%,white)] hover:shadow-[0_18px_32px_-18px_var(--c)] sm:px-4 sm:py-4"
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
-              <Icon className="size-[18px]" strokeWidth={2} />
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--c)_13%,white)] text-[var(--c)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-[-8deg] group-hover:scale-110 group-hover:bg-[var(--c)] group-hover:text-white sm:size-11">
+              <Icon className="size-[19px] sm:size-5" strokeWidth={2} />
             </span>
-            <span className="truncate text-[13.5px] font-semibold text-ink">{q.label}</span>
-            <ChevronRight className="ml-auto size-4 shrink-0 text-[#9aa9a6] transition group-hover:translate-x-0.5 group-hover:text-brand-600 sm:ml-0" strokeWidth={2.4} />
+            <span className="min-w-0 max-w-full sm:flex-1">
+              <span className="block truncate text-[13.5px] font-bold text-ink transition-colors group-hover:text-[var(--c)] sm:text-[15px]">{q.label}</span>
+              {q.hint && <span className="mt-0.5 hidden truncate text-[12px] text-muted sm:block">{q.hint}</span>}
+            </span>
+            <span className="hidden size-7 shrink-0 place-items-center rounded-full text-[#9aa9a6] sm:grid transition duration-300 group-hover:translate-x-0.5 group-hover:bg-[var(--c)] group-hover:text-white">
+              <ChevronRight className="size-4" strokeWidth={2.6} />
+            </span>
+            {/* colour line that grows along the bottom edge */}
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[var(--c)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+            />
           </SmartLink>
         )
       })}
