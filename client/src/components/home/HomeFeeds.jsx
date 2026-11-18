@@ -127,7 +127,7 @@ export function FoodArticles({ items = [] }) {
   return (
     <section className="container-bm pt-16 lg:pt-20">
       <HomeTitle eyebrow="Food stories" title={t('เรื่องอร่อยในบอนมาร์เช่')} href="#" />
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((a) => (
           <SmartLink key={a.id} href={a.url} className="group overflow-hidden rounded-[18px] border border-[#e6eeec] bg-white transition hover:-translate-y-1 hover:shadow-card">
             <div className="aspect-[16/10] overflow-hidden">
