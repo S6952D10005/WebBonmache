@@ -18,6 +18,7 @@ export const HOME = {
         id: 'food',
         icon: 'Utensils',
         label: 'ร้านอาหารแนะนำ',
+        hint: 'ร้านเด็ดประจำสัปดาห์', // short line under the label
         intro: 'คัดร้านเด็ดประจำสัปดาห์ ทั้งของคาว ของหวาน และเครื่องดื่ม',
         links: [
           { label: 'อาหารและเครื่องดื่ม', url: '/shops?cat=1' },
@@ -33,6 +34,7 @@ export const HOME = {
         id: 'shopping',
         icon: 'ShoppingBag',
         label: 'ช้อปปิ้ง',
+        hint: 'แฟชั่น · ของใช้ · สุขภาพ',
         intro: 'แฟชั่น ของใช้ และสินค้าสุขภาพ ครบในที่เดียว',
         links: [
           { label: 'แฟชั่นและไลฟ์สไตล์', url: '/shops?cat=3' },
@@ -48,6 +50,7 @@ export const HOME = {
         id: 'services',
         icon: 'Store',
         label: 'ร้านค้าและบริการ',
+        hint: 'แผนผัง · ที่จอดรถ · เช่าพื้นที่',
         intro: 'บริการที่จอดรถ จุดรับส่ง และสิ่งอำนวยความสะดวกในตลาด',
         links: [
           { label: 'แผนผังและร้านค้าทั้งหมด', url: '/shops' },

@@ -8,29 +8,56 @@ const ICONS = { Store, CalendarDays, MapPin, Building }
 const TAB_ICONS = { Utensils, ShoppingBag, Store }
 
 /* ======================================================================== */
-/*  Headline tab – sits in the white card on the edge of the banner image.  */
-/*  Three topic buttons; the panel stays hidden until one is clicked        */
-/*  (click it again to hide it). Only the button row is centred on the      */
-/*  image edge (data-hero-anchor) – the panel opens downwards.              */
+/*  Headline tab – one segmented bar in the white card on the banner edge.  */
+/*   - mouse: point at a topic → its panel drops down (floats over the     */
+/*     page, nothing below moves); leave the bar + panel → it closes        */
+/*   - touch / keyboard: tap / Enter opens, tap the same topic again closes */
+/*  The bar is centred on the image edge (data-hero-anchor).                */
 /* ======================================================================== */
+const CLOSE_DELAY = 180 // ms – time to move the mouse from the bar into the panel
+
 export function HeadlineTab({ tabs = [] }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState(tabs[0]?.id)
-  const tab = tabs.find((x) => x.id === current) || tabs[0]
-  if (!tab) return null
+  const closeTimer = useRef(0)
+  const root = useRef(null)
+  const index = Math.max(0, tabs.findIndex((x) => x.id === current))
+  const tab = tabs[index]
 
-  const pick = (id) => {
-    if (open && id === current) setOpen(false)
-    else {
-      setCurrent(id)
-      setOpen(true)
-    }
+  const cancelClose = () => clearTimeout(closeTimer.current)
+  const closeSoon = () => {
+    cancelClose()
+    closeTimer.current = setTimeout(() => setOpen(false), CLOSE_DELAY)
   }
+  const show = (id) => {
+    cancelClose()
+    setCurrent(id)
+    setOpen(true)
+  }
+  const toggle = (id) => (open && id === current ? setOpen(false) : show(id))
+
+  // close on Escape / a tap outside
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    const onDown = (e) => !root.current?.contains(e.target) && setOpen(false)
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [open])
+  useEffect(() => cancelClose, [])
+
+  if (!tab) return null
+  const mouse = (e) => e.pointerType === 'mouse'
 
   return (
-    <div>
-      <div data-hero-anchor role="tablist" className="grid grid-cols-3 gap-2 sm:gap-3">
+    <div ref={root} className="relative" onPointerLeave={(e) => mouse(e) && closeSoon()} onPointerEnter={(e) => mouse(e) && open && cancelClose()}>
+      {/* ---------- segmented bar ---------- */}
+      <div data-hero-anchor role="tablist" className="grid grid-cols-3 divide-x divide-[#e8efed]">
         {tabs.map((x) => {
           const on = open && x.id === current
           const Icon = TAB_ICONS[x.icon] || Sparkles
@@ -41,38 +68,80 @@ export function HeadlineTab({ tabs = [] }) {
               role="tab"
               aria-selected={on}
               aria-expanded={on}
-              onClick={() => pick(x.id)}
-              className={`group flex flex-col items-center gap-1 rounded-[14px] border px-1.5 py-2 text-center transition duration-300 sm:flex-row sm:gap-3 sm:rounded-full sm:px-4 sm:py-3 sm:text-left ${
-                on
-                  ? 'border-brand-600 bg-brand-600 text-white shadow-[0_10px_22px_-12px_rgb(15_111_102/0.8)]'
-                  : 'border-[#e3ebe9] bg-white text-ink hover:border-brand-300 hover:shadow-[0_8px_18px_-12px_rgb(12_80_72/0.5)]'
-              }`}
+              aria-controls="headline-panel"
+              onPointerEnter={(e) => mouse(e) && show(x.id)}
+              onClick={(e) => (e.nativeEvent.pointerType === 'mouse' ? show(x.id) : toggle(x.id))}
+              className="group relative flex flex-col items-center justify-center gap-1.5 px-1 py-1.5 text-center outline-none sm:flex-row sm:gap-3 sm:px-3 sm:py-2 sm:text-left"
             >
-              <Icon className={`size-[19px] shrink-0 ${on ? 'text-white' : 'text-brand-600'}`} strokeWidth={2} />
-              <span className="min-w-0 flex-1 text-[11.5px] font-semibold leading-tight sm:truncate sm:text-[14px]">{x.label}</span>
-              <ChevronDown
-                className={`hidden size-4 shrink-0 transition-transform duration-300 sm:block ${on ? 'rotate-180 text-white' : 'text-brand-600 group-hover:translate-y-0.5'}`}
-                strokeWidth={2.4}
+              {/* hover / open background */}
+              <span
+                aria-hidden="true"
+                className={`absolute inset-x-1 inset-y-0 -z-0 rounded-[14px] transition duration-300 sm:inset-x-2 ${
+                  on ? 'bg-brand-50' : 'bg-transparent group-hover:bg-[#f4f8f7] group-focus-visible:bg-[#f4f8f7]'
+                }`}
+              />
+              <span
+                className={`relative grid size-10 shrink-0 place-items-center rounded-full transition duration-300 sm:size-11 ${
+                  on ? 'bg-brand-600 text-white shadow-[0_8px_16px_-8px_rgb(15_111_102/0.9)]' : 'bg-brand-50 text-brand-600 group-hover:bg-brand-100'
+                }`}
+              >
+                <Icon className="size-[19px] sm:size-5" strokeWidth={2} />
+              </span>
+              <span className="relative min-w-0">
+                <span className="flex items-center justify-center gap-1 sm:justify-start">
+                  <span className={`text-[11.5px] font-bold leading-tight sm:text-[15px] ${on ? 'text-brand-700' : 'text-ink'}`}>{x.label}</span>
+                  <ChevronDown
+                    className={`hidden size-4 shrink-0 transition-transform duration-300 sm:block ${on ? 'rotate-180 text-brand-600' : 'text-[#9fb0ad] group-hover:text-brand-600'}`}
+                    strokeWidth={2.4}
+                  />
+                </span>
+                {x.hint && <span className="mt-0.5 hidden truncate text-[12px] text-muted sm:block">{x.hint}</span>}
+              </span>
+              {/* little bar under the open topic */}
+              <span
+                aria-hidden="true"
+                className={`absolute -bottom-[7px] left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-500 to-[#f37021] transition-all duration-300 sm:-bottom-[9px] ${
+                  on ? 'w-12 opacity-100' : 'w-0 opacity-0'
+                }`}
               />
             </button>
           )
         })}
       </div>
 
-      {/* panel – slides open (grid rows 0fr → 1fr) */}
-      <div className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
-        <div className="overflow-hidden" inert={!open}>
-          <div key={tab.id} className="mt-4 grid gap-5 border-t border-[#e7eeec] pb-1 pt-4 motion-safe:animate-[card-in_0.45s_ease-out] sm:grid-cols-[1fr_2fr]">
+      {/* ---------- drop-down panel (floats over the page below) ---------- */}
+      <div
+        id="headline-panel"
+        role="tabpanel"
+        inert={!open}
+        // pt = the card's bottom padding + a 10px gap; the padding still counts as "inside", so the mouse can cross it
+        // --edge = how far the panel reaches past the bar on each side (to the card's edges)
+        className={`absolute inset-x-0 top-full z-40 pt-6 transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [--edge:0px] sm:-inset-x-6 sm:pt-[26px] sm:[--edge:24px] ${
+          open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
+        }`}
+      >
+        <div className="relative rounded-[20px] border border-[#e6eeec] bg-white p-4 shadow-[0_28px_60px_-28px_rgb(12_80_72/0.55)] sm:p-6">
+          {/* pointer towards the open topic */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-[7px] size-3.5 -translate-x-1/2 rotate-45 rounded-[3px] border-l border-t border-[#e6eeec] bg-white transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{ left: `calc(var(--edge) + ${(index + 0.5) / tabs.length} * (100% - 2 * var(--edge)))` }}
+          />
+          <div key={tab.id} className="grid gap-5 motion-safe:animate-[card-in_0.35s_ease-out] sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-6">
             <div className="flex flex-col justify-center">
               <p className="text-[18px] font-extrabold text-brand-800">{tab.label}</p>
               <p className="mt-1 text-[13px] leading-relaxed text-muted">{tab.intro}</p>
-              <ul className="mt-3 space-y-1.5">
+              <ul className="mt-3 space-y-1">
                 {tab.links.map((l) => (
                   <li key={l.label}>
-                    <SmartLink href={l.url} className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2b3a38] hover:text-brand-700">
-                      <span className="size-1 rounded-full bg-[#f37021]" />
+                    <SmartLink
+                      href={l.url}
+                      onClick={() => setOpen(false)}
+                      className="group -mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13.5px] font-semibold text-[#2b3a38] transition hover:bg-brand-50 hover:text-brand-700"
+                    >
+                      <span className="size-1.5 shrink-0 rounded-full bg-[#f37021]" />
                       {l.label}
-                      <ArrowRight className="size-3.5 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" strokeWidth={2.4} />
+                      <ArrowRight className="ml-auto size-3.5 text-brand-600 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" strokeWidth={2.4} />
                     </SmartLink>
                   </li>
                 ))}
@@ -80,13 +149,18 @@ export function HeadlineTab({ tabs = [] }) {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {tab.cards.map((c) => (
-                <SmartLink key={c.title} href={c.url} className="group overflow-hidden rounded-[14px] border border-[#e6eeec] bg-white">
+                <SmartLink
+                  key={c.title}
+                  href={c.url}
+                  onClick={() => setOpen(false)}
+                  className="group overflow-hidden rounded-[14px] border border-[#e6eeec] bg-white transition hover:-translate-y-0.5 hover:shadow-card"
+                >
                   <div className="aspect-[16/9] overflow-hidden">
                     <SmartImage src={c.image} alt={c.title} className="h-full w-full transition duration-500 group-hover:scale-105" />
                   </div>
                   <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                     <span className="truncate text-[13px] font-semibold text-ink">{c.title}</span>
-                    <span className="flex shrink-0 items-center gap-1 text-[11.5px] font-semibold text-brand-700">
+                    <span className="hidden shrink-0 items-center gap-1 text-[11.5px] font-semibold text-brand-700 sm:flex">
                       {t('ดูเพิ่มเติม')}
                       <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" strokeWidth={2.4} />
                     </span>
