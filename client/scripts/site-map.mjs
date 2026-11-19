@@ -2,7 +2,7 @@
  * Aerial photo → outside-area data for the 3D map
  * ---------------------------------------------------------------------------
  *  The CAD drawing (asset/cad/market.dwg) only has the buildings. Everything
- *  around them – roads, entrances, car parks, the pond, trees, neighbouring
+ *  around them – roads, entrances, car parks, the pond, green areas, neighbouring
  *  blocks – is traced from the aerial photo asset/cad/aerial.jpg.
  *
  *  Tracing is done in PHOTO PIXELS below (easy to check against the photo).
@@ -86,7 +86,8 @@ const ISLANDS = [
   { at: [400, 537], r: 7 },
 ]
 
-/* low structures that are not in the CAD drawing (height in metres) */
+/* low structures that are not in the CAD drawing (height in metres)
+   (pavilion, pond restaurant, guard houses, อาคาร M / N … come from the drawing – scripts/cad-map.mjs) */
 const STRUCTURES = [
   {
     id: 'walkway-roof',
@@ -95,54 +96,20 @@ const STRUCTURES = [
     color: '#cdd5d5',
     outline: [[105, 425], [430, 425], [442, 445], [425, 462], [402, 462], [398, 478], [380, 488], [330, 495], [285, 490], [262, 476], [255, 462], [105, 462]],
   },
-  { id: 'pond-pavilion', name: 'ศาลากลางน้ำ', height: 4.2, color: '#f4f1ea', outline: [[271, 585], [300, 585], [300, 645], [271, 645]] },
-  { id: 'pond-restaurant', name: 'ร้านริมน้ำ', height: 5, color: '#9aa7a6', outline: [[400, 458], [425, 455], [445, 470], [448, 520], [430, 528], [405, 522]] },
   { id: 'e-walkway', name: 'หลังคาทางเดินริมถนน', height: 3.6, color: '#e6ebeb', outline: [[492, 392], [504, 384], [655, 582], [643, 590]] },
-  // older buildings inside the property line (north end + south-east corner)
-  { id: 'north-hall', kind: 'other', height: 7, color: '#d9dedd', outline: [[106, 6], [168, 6], [168, 62], [106, 62]] },
+  // older buildings inside the property line that the CAD drawing does not have
   { id: 'north-house', kind: 'other', height: 6, color: '#a9b1b1', outline: [[172, 18], [215, 18], [248, 78], [232, 88], [150, 88], [150, 66], [172, 66]] },
-  { id: 'red-roof', kind: 'other', height: 6, color: '#e48f7f', outline: [[136, 90], [204, 90], [204, 124], [136, 124]] },
   { id: 'north-row-1', kind: 'other', height: 6, color: '#a9b1b1', outline: [[232, 26], [292, 20], [322, 62], [330, 92], [292, 98], [258, 84]] },
-  { id: 'north-row-2', kind: 'other', height: 6, color: '#b3bbba', outline: [[226, 94], [256, 88], [322, 150], [306, 174], [284, 168], [226, 112]] },
   { id: 'north-row-3', kind: 'other', height: 5, color: '#a9b1b1', outline: [[286, 150], [326, 146], [336, 180], [300, 186]] },
-  { id: 'se-hall', kind: 'other', height: 7, color: '#8f9a9a', outline: [[712, 698], [742, 698], [768, 750], [772, 790], [712, 790]] },
-  { id: 'se-white', kind: 'other', height: 6, color: '#e7eaea', outline: [[716, 806], [784, 806], [796, 866], [716, 868]] },
   { id: 'drop-off', name: 'หลังคาจุดรับส่ง', height: 4.5, color: '#f6d6e6', outline: [[565, 615], [600, 600], [640, 620], [650, 660], [610, 665], [580, 650]] },
 ]
 
-/* green areas (lawn / woods); woods get filled with trees */
+/* green areas (lawn / woods) – flat on the map */
 const GREEN = [
   { kind: 'woods', outline: [[290, 15], [395, 5], [420, 60], [450, 130], [475, 175], [430, 215], [380, 210], [335, 180], [300, 140], [280, 90]] },
   { kind: 'woods', outline: [[395, 232], [440, 242], [470, 298], [430, 330], [402, 290]] },
   { kind: 'lawn', outline: [[150, 884], [760, 884], [760, 893], [150, 893]] },
 ]
-
-/* single trees */
-const TREES = [
-  ...Array.from({ length: 27 }, (_, i) => [162 + i * 22, 888]), // along the main road
-  [246, 500], [248, 560], [250, 620], [458, 578], [466, 616], [425, 650], [392, 470], // around the pond
-  [655, 545], [700, 545], [745, 540], // east car park edge
-]
-
-const inside = (poly, [x, y]) => {
-  let hit = false
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i]
-    const [xj, yj] = poly[j]
-    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit
-  }
-  return hit
-}
-GREEN.filter((g) => g.kind === 'woods').forEach((g, gi) => {
-  const xs = g.outline.map((p) => p[0])
-  const ys = g.outline.map((p) => p[1])
-  for (let y = Math.min(...ys) + 9, r = 0; y < Math.max(...ys); y += 17, r++)
-    for (let x = Math.min(...xs) + 9 + (r % 2) * 8; x < Math.max(...xs); x += 17) {
-      const j = ((x * 13 + y * 7 + gi * 5) % 9) - 4
-      const p = [x + j, y - j / 2]
-      if (inside(g.outline, p)) TREES.push(p)
-    }
-})
 
 /* neighbouring blocks (flat, light) – drawn under the roads */
 const NEIGHBOURS = [
@@ -227,7 +194,6 @@ const site = {
   islands: ISLANDS.map((i) => ({ at: toPlan(i.at), r: m(i.r) })),
   structures: STRUCTURES.map((s) => ({ ...s, outline: s.outline.map(toPlan) })),
   green: GREEN.map((g) => ({ ...g, outline: g.outline.map(toPlan) })),
-  trees: TREES.map(toPlan),
   neighbours: NEIGHBOURS.map((n) => n.map(toPlan)),
   ground: SITE.map(toPlan),
   gates: GATES.map((g) => ({ ...g, at: toPlan(g.at) })),
@@ -235,7 +201,7 @@ const site = {
 }
 
 const js = `/*
- * Outside area for the 3D map (roads, car parks, pond, trees, neighbours, entrances)
+ * Outside area for the 3D map (roads, car parks, pond, neighbours, entrances)
  * GENERATED from asset/cad/aerial.jpg by scripts/site-map.mjs (npm run site-map).
  * Edit the tracing in that script, not this file.
  * Units: plan metres – same as marketPlan.js (x → east, y → south).
@@ -262,7 +228,6 @@ if (process.argv.includes('--preview')) {
     poly(POND, 'fill="#00ccff" fill-opacity="0.35" stroke="#00ccff" stroke-width="2"'),
     ...STRUCTURES.map((s) => poly(s.outline, 'fill="#ffaa00" fill-opacity="0.35" stroke="#ffaa00" stroke-width="1.5"')),
     ...PLAN.buildings.map((b) => poly(b.outline.map(toPx), 'fill="none" stroke="#ff00ff" stroke-width="2"')),
-    ...TREES.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#00ff66" stroke="#003300"/>`),
     ...GATES.map((g) => `<circle cx="${g.at[0]}" cy="${g.at[1]}" r="7" fill="${g.dir === 'in' ? '#00cc66' : '#ff3333'}" stroke="#fff" stroke-width="2"/>`),
   ].join('')
   const out = path.join(ROOT, 'asset/cad/aerial-check.png')

@@ -1,23 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Box, LogIn, Pointer, LogOut, Minus, Plus, RotateCcw, RotateCw, Square, Store, Undo2, Waves } from 'lucide-react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Box, LogIn, LogOut, Minus, Plus, Pointer, RotateCcw, RotateCw, Square, Store, Undo2 } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { PLAN } from '../data/marketPlan'
 import { SITE } from '../data/marketSite'
+import { lotBays, neighbourhoodBlocks, parkingStripes, roofUnits } from './marketMapGeometry'
 
 /*
  * ===========================================================================
- *  Market map – 3D plan drawn from the CAD drawing
+ *  Market map – 3D plan drawn from the CAD drawing (Fashion-Island-style look)
  * ===========================================================================
- *  Building outlines + heights come from src/data/marketPlan.js, which is
- *  generated from asset/cad/market.dwg (npm run cad-map). Each building is a
- *  zone: tap it and the shop list below shows only its shops.
+ *  Buildings (outline + height) come from src/data/marketPlan.js, generated from
+ *  asset/cad/market.dwg (npm run cad-map). The outside area – roads, car parks,
+ *  pond, neighbours, entrances – comes from src/data/marketSite.js, traced from
+ *  the aerial photo (npm run site-map). Each shop building is a zone: tap it and
+ *  the shop list below shows only its shops.
  *
- *  The 3D look is drawn by hand in SVG (no 3D library): every outline corner is
- *  turned / tilted with the camera, walls are drawn back-to-front, then the
- *  roofs and the name pins on top.
- *   - "กดเพื่อเริ่มใช้งาน / TAP TO NAVIGATE" overlay → tap to start
- *   - 2D (straight down) / 3D (tilted, buildings rise up), rotate left / right,
- *     zoom, drag to move, reset – camera moves are animated
+ *  The 3D look is drawn by hand in SVG (no 3D library): every corner is turned /
+ *  tilted with the camera, walls are drawn back-to-front, then the roofs with
+ *  their shop units, and the name pins (HTML) on top.
+ *   - light grey city map around the market, white roads, dark grey car parks
+ *   - shop roofs show rows of units (decorative floor plan, marketMapGeometry.js)
+ *   - 2D (straight down) / 3D (tilted), rotate, zoom, drag, reset – animated
  * ===========================================================================
  */
 
@@ -26,14 +29,34 @@ export const ZONE_COLORS = {
   MK: '#1f9285',
   A: '#f7931e',
   BC: '#00a3e0',
+  D: '#e2a300',
   E: '#ec1c8c',
   F: '#7f63c9',
   G: '#8cc63f',
   H: '#f0483e',
+  M: '#3d6bd9',
+  N: '#a47551',
 }
-const PARKING = '#b9c3c4'
 
-const HEIGHT_SCALE = 1.9 // buildings drawn a little taller than real so the 3D reads well
+/* map palette – quiet greys so the coloured buildings stand out */
+const C = {
+  ground: '#edf0ef',
+  neighbour: '#e5e9e8',
+  block: '#dadfde',
+  blockEdge: '#d0d6d5',
+  site: '#fafbfa',
+  woods: '#d6e6d3',
+  lawn: '#e3eedf',
+  lot: '#a4adaf',
+  kerb: '#d5dbdb',
+  water: '#cfe6ee',
+  waterEdge: '#b4d6e1',
+  parking: '#97a1a3',
+  other: '#dde2e2',
+  wallShade: '#0d2b28',
+}
+
+const HEIGHT_SCALE = 1.25 // buildings a little taller than real so the 3D reads well
 const PITCH_3D = (52 * Math.PI) / 180
 const START_BEARING = (-18 * Math.PI) / 180
 const QUARTER = Math.PI / 4
@@ -48,8 +71,7 @@ const mix = (c, to, t) => {
 }
 
 /* ---------- camera ---------- */
-const CX = PLAN.width / 2
-const CY = PLAN.depth / 2
+const [CX, CY] = PLAN.center
 function makeProjector({ pitch, bearing }) {
   const c = Math.cos(bearing)
   const s = Math.sin(bearing)
@@ -63,30 +85,22 @@ function makeProjector({ pitch, bearing }) {
   }
 }
 const pts = (list) => list.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
+const area = (o) => o.reduce((a, [x1, y1], i) => a + x1 * o[(i + 1) % o.length][1] - o[(i + 1) % o.length][0] * y1, 0) / 2
+const clockwise = (o) => (area(o) < 0 ? [...o].reverse() : o)
 
-/* parking bays + parked cars along each row (plan metres), from the traced site */
-const LOTS = SITE.parking.map((lot, li) => {
-  const bays = []
-  const cars = []
-  lot.rows.forEach(([a, b], ri) => {
-    const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
-    const u = [(b[0] - a[0]) / len, (b[1] - a[1]) / len]
-    const n = [-u[1], u[0]]
-    const at = (t, k) => [a[0] + u[0] * t + n[0] * k, a[1] + u[1] * t + n[1] * k]
-    for (let t = 0, i = 0; t <= len; t += 2.6, i++) {
-      bays.push([at(t, -5), at(t, 5)])
-      if (t + 2.6 > len) break
-      ;[-1, 1].forEach((side) => {
-        if ((i * 7 + ri * 3 + li + (side > 0 ? 2 : 0)) % 5 < 2) return
-        const c = (dx, dy) => at(t + 1.3 + dx, side * 2.6 + dy)
-        cars.push({ q: [c(-0.85, -2.1), c(0.85, -2.1), c(0.85, 2.1), c(-0.85, 2.1)], tone: (i + ri + li) % 4 })
-      })
-    }
-    bays.push([a, b])
-  })
-  return { ...lot, bays, cars }
-})
-const CAR_TONES = ['#ffffff', '#c9d2d6', '#8fa3ad', '#e7b9c8']
+/* ---------- everything that does not depend on the camera (plan metres) ---------- */
+// CAD buildings + the low roofs traced from the photo, as one list of solids
+const SOLIDS = [
+  ...PLAN.buildings.map((b, i) => ({
+    ...b,
+    id: `b${i}`,
+    units: b.kind === 'shop' ? roofUnits(b.outline, i + 1) : [],
+    stripes: b.kind === 'parking' ? parkingStripes(b.outline) : [],
+  })),
+  ...SITE.structures.map((s) => ({ ...s, id: s.id, kind: 'roof', outline: clockwise(s.outline), units: [], stripes: [] })),
+]
+const BLOCKS = neighbourhoodBlocks(SITE)
+const LOTS = SITE.parking.map((l) => ({ ...l, ...lotBays(l), big: l.id === 'front' || l.id === 'east-yard' }))
 
 /** animate the camera towards `target` (instant when "reduce motion" is on) */
 function useCamera(target) {
@@ -112,8 +126,19 @@ function useCamera(target) {
   return cam
 }
 
+// screen angle of a plan direction (for text lying along a road / car-park row), kept readable
+function textAngle(P, a, b) {
+  const p = P(a)
+  const q = P(b)
+  let ang = (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI
+  if (ang > 90) ang -= 180
+  if (ang < -90) ang += 180
+  return ang
+}
+
 export default function MarketMap({ zones = [], counts = {}, selected = '', onSelect }) {
   const { t } = useI18n()
+  const uid = useId().replace(/:/g, '')
   const [started, setStarted] = useState(false)
   const [mode3d, setMode3d] = useState(true)
   const [bearing, setBearing] = useState(START_BEARING)
@@ -155,20 +180,23 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
   const onPointerUp = () => (drag.current = null)
 
   const zoneName = (code) => zones.find((z) => z.code === code)?.name
+  const pick = (code) => started && onSelect?.(selected === code ? '' : code)
 
   /* ---------- project everything for the current camera ---------- */
   const scene = useMemo(() => {
     const P = makeProjector(cam)
     const c = Math.cos(cam.bearing)
     const s = Math.sin(cam.bearing)
+    const flat = (o) => o.map((p) => P(p))
 
-    const buildings = PLAN.buildings.map((b) => {
+    const solids = SOLIDS.map((b) => {
       const isShop = b.kind === 'shop'
       const lit = isShop && (selected === b.code || hover === b.code)
       const dim = Boolean(selected) && selected !== b.code
-      const h = b.height * HEIGHT_SCALE * cam.lift + (lit ? 3 * cam.lift + 0.001 : 0)
-      const base = isShop ? ZONE_COLORS[b.code] || '#138377' : PARKING
-      const color = dim ? mix(base, '#e9ecec', isShop ? 0.72 : 0.4) : base
+      const tall = b.kind === 'roof' ? 0.75 : 1 // traced low roofs (walkways, drop-off) stay low
+      const h = b.height * HEIGHT_SCALE * tall * cam.lift + (lit ? 3 * cam.lift + 0.001 : 0)
+      const base = isShop ? ZONE_COLORS[b.code] || '#138377' : b.kind === 'parking' ? C.parking : b.color || C.other
+      const color = dim ? mix(base, '#e9ecec', isShop ? 0.72 : 0.35) : base
 
       const n = b.outline.length
       const walls = []
@@ -187,113 +215,84 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
           const rx = nx * c - ny * s
           const light = 0.5 + 0.5 * (rx * -0.55 + ry * 0.83) // light from the front-left
           const q = [P(a), P(z), P(z, h), P(a, h)]
-          walls.push({ q, d: (q[0].d + q[1].d) / 2, fill: mix(color, '#0d2b28', 0.42 - 0.3 * light) })
+          walls.push({ q, d: (q[0].d + q[1].d) / 2, fill: mix(color, C.wallShade, 0.4 - 0.28 * light) })
         }
         walls.sort((w1, w2) => w1.d - w2.d)
       }
       const roof = b.outline.map((p) => P(p, h))
-      const pin = P(b.label, h)
-      const depth = roof.reduce((sum, p) => sum + p.d, 0) / roof.length
-      return { ...b, isShop, lit, dim, color, walls, roof, pin, depth, h }
+      return {
+        ...b,
+        isShop,
+        lit,
+        dim,
+        color,
+        walls,
+        roof,
+        // shop roofs: light floor with coloured units on it (the floor-plan look)
+        roofFill: isShop ? mix(color, '#ffffff', 0.72) : b.kind === 'parking' ? color : mix(color, '#ffffff', 0.25),
+        units: b.units.map((u) => ({ q: u.q.map((p) => P(p, h)), fill: mix(color, '#ffffff', 0.04 + u.tone * 0.3) })),
+        stripes: b.stripes.map(([a, z]) => [P(a, h), P(z, h)]),
+        shadow: h > 0.05 ? b.outline.map((p) => P([p[0] + 0.25 * h, p[1] + 0.25 * h])) : null,
+        pin: P(b.label || b.outline[0], h),
+        depth: roof.reduce((sum, p) => sum + p.d, 0) / roof.length,
+      }
     })
-    buildings.sort((a, b) => a.depth - b.depth)
+    solids.sort((a, b) => a.depth - b.depth)
 
     // view box = the whole property (ground + buildings), plus room for the pins
-    const all = [...buildings.flatMap((b) => b.roof), ...SITE.ground.map((p) => P(p))]
+    const all = [...solids.flatMap((b) => b.roof), ...SITE.ground.map((p) => P(p))]
     const xs = all.map((p) => p.x)
     const ys = all.map((p) => p.y)
     const pad = 8
     const box = {
       x: Math.min(...xs) - pad,
-      y: Math.min(...ys) - pad - 10,
+      y: Math.min(...ys) - pad - 12,
       w: Math.max(...xs) - Math.min(...xs) + pad * 2,
-      h: Math.max(...ys) - Math.min(...ys) + pad * 2 + 10,
+      h: Math.max(...ys) - Math.min(...ys) + pad * 2 + 12,
     }
 
-    // parking stripes across the car-park roof (in plan coordinates, then projected)
-    const stripes = []
-    const park = PLAN.buildings.find((b) => b.kind === 'parking')
-    if (park) {
-      const xs2 = park.outline.map((p) => p[0])
-      const ys2 = park.outline.map((p) => p[1])
-      const hh = park.height * HEIGHT_SCALE * cam.lift
-      for (let x = Math.min(...xs2) + 3; x < Math.max(...xs2); x += 3.2)
-        stripes.push([P([x, Math.min(...ys2)], hh), P([x, Math.max(...ys2)], hh)])
-    }
-
+    const main = SITE.roads.find((r) => r.kind === 'main')
     return {
-      buildings,
-      box,
-      stripes,
-      ...(() => {
-        const flat = (o) => o.map((p) => P(p))
-        const lift = cam.lift
-        // low roofs (walkways, pavilion, drop-off) – extruded like the buildings
-        const structures = SITE.structures.map((st) => {
-          const h = st.height * HEIGHT_SCALE * 0.75 * lift
-          const n = st.outline.length
-          const walls = []
-          for (let i = 0; i < n && h > 0.05; i++) {
-            const a = st.outline[i]
-            const z = st.outline[(i + 1) % n]
-            const q = [P(a), P(z), P(z, h), P(a, h)]
-            // keep the wall only if it faces the viewer (screen winding)
-            const cross = (q[1].x - q[0].x) * (q[3].y - q[0].y) - (q[1].y - q[0].y) * (q[3].x - q[0].x)
-            walls.push({ q, d: (q[0].d + q[1].d) / 2, front: cross })
-          }
-          const roof = st.outline.map((p) => P(p, h))
-          return { ...st, walls: walls.sort((w1, w2) => w1.d - w2.d), roof, depth: roof.reduce((t, p) => t + p.d, 0) / n }
-        })
-        structures.sort((x, y) => x.depth - y.depth)
-        const trees = SITE.trees
-          .map((p) => ({ g: P(p), top: P(p, 4.6 * HEIGHT_SCALE * lift) }))
-          .sort((x, y) => x.top.d - y.top.d)
-        return {
-          neighbours: SITE.neighbours.map(flat),
-          ground: flat(SITE.ground),
-          green: SITE.green.map((g) => ({ kind: g.kind, poly: flat(g.outline) })),
-          lots: LOTS.map((l) => ({
-            id: l.id,
-            poly: flat(l.outline),
-            bays: l.bays.map(([a, z]) => [P(a), P(z)]),
-            cars: l.cars.map((c) => ({ q: flat(c.q), tone: c.tone })),
-            label: P(l.label),
-          })),
-          roads: SITE.roads.map((r) => ({ ...r, pts: flat(r.line) })),
-          pond: flat(SITE.pond),
-          islands: SITE.islands.map((i) => ({ at: P(i.at), r: i.r })),
-          structures,
-          trees,
-          gates: SITE.gates.map((g) => {
-            // arrow painted on the drive: points into the site (north) for an entrance, out (south) for an exit
-            const f = g.dir === 'in' ? 1 : -1
-            const [gx, gy] = g.at
-            const shape = [[0, -6], [3.4, -1.2], [1.3, -1.2], [1.3, 5], [-1.3, 5], [-1.3, -1.2], [-3.4, -1.2]]
-            return {
-              ...g,
-              arrow: shape.map(([x, y]) => P([gx + x, gy - 4.5 + y * f])),
-              p: P([gx, gy + 7]),
-            }
-          }),
-          landmarks: SITE.landmarks.map((l) => ({ ...l, p: P(l.at) })),
-          roadName: (() => {
-            const main = SITE.roads.find((r) => r.kind === 'main')
-            if (!main) return null
-            const [a, z] = [P(main.line[0]), P(main.line[main.line.length - 1])]
-            let ang = (Math.atan2(z.y - a.y, z.x - a.x) * 180) / Math.PI
-            if (ang > 90) ang -= 180
-            if (ang < -90) ang += 180
-            return { name: main.name, p: P([CX, main.line[0][1] + 0.6]), ang }
-          })(),
-        }
-      })(),
       P,
+      box,
+      solids,
+      neighbours: SITE.neighbours.map(flat),
+      blocks: BLOCKS.map(flat),
+      ground: flat(SITE.ground),
+      green: SITE.green.map((g) => ({ kind: g.kind, poly: flat(g.outline) })),
+      lots: LOTS.map((l) => ({
+        id: l.id,
+        big: l.big,
+        poly: flat(l.outline),
+        bays: l.lines.map(([a, z]) => [P(a), P(z)]),
+        label: P(l.label),
+        angle: textAngle(P, l.dir[0], l.dir[1]),
+      })),
+      roads: SITE.roads.map((r) => ({ ...r, pts: flat(r.line) })),
+      roadName: main && {
+        name: main.name,
+        p: P([CX - 30, main.line[0][1] + 0.4]),
+        angle: textAngle(P, main.line[0], main.line[main.line.length - 1]),
+      },
+      pond: flat(SITE.pond),
+      islands: SITE.islands.map((i) => ({ at: P(i.at), r: i.r })),
+      landmarks: SITE.landmarks.map((l) => ({ ...l, p: P(l.at) })),
+      gates: SITE.gates.map((g) => {
+        // arrow painted on the drive: points into the site (north) for an entrance, out (south) for an exit
+        const f = g.dir === 'in' ? 1 : -1
+        const [gx, gy] = g.at
+        const shape = [[0, -6], [3.4, -1.2], [1.3, -1.2], [1.3, 5], [-1.3, 5], [-1.3, -1.2], [-3.4, -1.2]]
+        return { ...g, arrow: shape.map(([x, y]) => P([gx + x, gy - 4.5 + y * f])), p: P([gx, gy + 7]) }
+      }),
     }
   }, [cam, selected, hover])
 
   const { box } = scene
   const compact = size.w > 0 && size.w < 520
   const north = (-cam.bearing * 180) / Math.PI
+  // map units → pixels inside the stage (for the HTML pins)
+  const k = size.w ? Math.min(size.w / box.w, size.h / box.h) : 0
+  const toPx = (p) => ({ left: (size.w - box.w * k) / 2 + (p.x - box.x) * k, top: (size.h - box.h * k) / 2 + (p.y - box.y) * k })
 
   return (
     <div className="relative">
@@ -307,7 +306,8 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
         className="pointer-events-none absolute -bottom-4 -left-4 z-10 size-14 rounded-bl-[22px] border-b-[6px] border-l-[6px] border-[#ffd23f] sm:size-20"
       />
 
-      <div className="relative overflow-hidden rounded-[24px] border border-[#e6eaea] bg-[#f1f3f3]">
+      {/* overflow-clip (not hidden): the zoomed map can never scroll the box sideways when something inside gets focus */}
+      <div className="relative overflow-clip rounded-[24px] border border-[#e6eaea]" style={{ backgroundColor: C.ground }}>
         {/* map canvas */}
         <div
           className={`relative aspect-[1000/540] min-h-[420px] w-full touch-none select-none ${started ? 'cursor-grab active:cursor-grabbing' : ''}`}
@@ -330,139 +330,121 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
               aria-label={t('แผนผังตลาดบอนมาร์เช่')}
             >
               {/* ground (far past the edges so zoom / drag never shows a border) */}
-              <rect x={box.x - 2000} y={box.y - 2000} width={box.w + 4000} height={box.h + 4000} fill="#eceeea" />
+              <rect x={box.x - 2000} y={box.y - 2000} width={box.w + 4000} height={box.h + 4000} fill={C.ground} />
 
-              {/* neighbours (muted) + the market's own ground inside the property line */}
+              {/* neighbourhood: plots + small house blocks */}
               {scene.neighbours.map((q, i) => (
-                <polygon key={`n${i}`} points={pts(q)} fill="#e2e6e2" stroke="#d6dbd7" strokeWidth="0.5" strokeLinejoin="round" />
+                <polygon key={`n${i}`} points={pts(q)} fill={C.neighbour} />
               ))}
-              <polygon points={pts(scene.ground)} fill="#fbfbf8" strokeLinejoin="round" />
+              <g fill={C.block} stroke={C.blockEdge} strokeWidth="0.3" strokeLinejoin="round">
+                {scene.blocks.map((q, i) => (
+                  <polygon key={i} points={pts(q)} />
+                ))}
+              </g>
+
+              {/* the market's own ground + green areas */}
+              <polygon points={pts(scene.ground)} fill={C.site} strokeLinejoin="round" />
               {scene.green.map((g, i) => (
-                <polygon
-                  key={`g${i}`}
-                  points={pts(g.poly)}
-                  fill={g.kind === 'woods' ? '#bfe0b8' : '#d9eecf'}
-                  stroke={g.kind === 'woods' ? '#a6d29d' : '#c5e3b9'}
-                  strokeWidth="0.6"
-                  strokeLinejoin="round"
-                />
+                <polygon key={`g${i}`} points={pts(g.poly)} fill={g.kind === 'woods' ? C.woods : C.lawn} strokeLinejoin="round" />
               ))}
 
-              {/* car parks: bays + parked cars */}
+              {/* open-air car parks: dark grey with white bays */}
               {scene.lots.map((l) => (
                 <g key={l.id}>
-                  <polygon points={pts(l.poly)} fill="#e1e6e6" stroke="#d3dada" strokeWidth="0.6" strokeLinejoin="round" />
-                  <g stroke="#ffffff" strokeWidth="0.35">
+                  <polygon points={pts(l.poly)} fill={C.lot} stroke={C.lot} strokeWidth="1.6" strokeLinejoin="round" />
+                  <g stroke="#ffffff" strokeWidth="0.32" opacity="0.9">
                     {l.bays.map(([a, z], i) => (
                       <line key={i} x1={a.x} y1={a.y} x2={z.x} y2={z.y} />
                     ))}
                   </g>
-                  {l.cars.map((c, i) => (
-                    <polygon key={i} points={pts(c.q)} fill={CAR_TONES[c.tone]} stroke="#9aa9ad" strokeWidth="0.2" strokeLinejoin="round" />
-                  ))}
                 </g>
               ))}
 
-              {/* roads: kerb, asphalt, centre line */}
+              {/* roads: kerb + white surface (+ dashed middle on the main road) */}
               <g fill="none" strokeLinecap="round" strokeLinejoin="round">
                 {scene.roads.map((r) => (
-                  <polyline key={`k${r.id}`} points={pts(r.pts)} stroke="#d6dcdc" strokeWidth={r.width + 1.4} />
+                  <polyline key={`k${r.id}`} points={pts(r.pts)} stroke={C.kerb} strokeWidth={r.width + 1.2} />
                 ))}
                 {scene.roads.map((r) => (
                   <polyline key={`r${r.id}`} points={pts(r.pts)} stroke="#ffffff" strokeWidth={r.width} />
                 ))}
                 {scene.roads
-                  .filter((r) => r.kind !== 'lane')
+                  .filter((r) => r.kind === 'main')
                   .map((r) => (
-                    <polyline key={`c${r.id}`} points={pts(r.pts)} stroke={r.kind === 'main' ? '#f2c94c' : '#e3e8e8'} strokeWidth={r.kind === 'main' ? 0.5 : 0.35} strokeDasharray="3 2.5" />
+                    <polyline key={`c${r.id}`} points={pts(r.pts)} stroke="#e7d9a8" strokeWidth="0.45" strokeDasharray="4 3" />
                   ))}
               </g>
-              {scene.roadName && (
-                <text
-                  x={scene.roadName.p.x}
-                  y={scene.roadName.p.y}
-                  transform={`rotate(${scene.roadName.ang.toFixed(1)} ${scene.roadName.p.x.toFixed(1)} ${scene.roadName.p.y.toFixed(1)})`}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize="4.2"
-                  fontWeight="600"
-                  fill="#8b9a98"
-                  letterSpacing="0.3"
-                >
-                  {t(scene.roadName.name)}
-                </text>
-              )}
 
               {/* pond */}
-              <defs>
-                <linearGradient id="mm-water" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#bfe9f2" />
-                  <stop offset="1" stopColor="#7fcbe0" />
-                </linearGradient>
-              </defs>
-              <polygon points={pts(scene.pond)} fill="url(#mm-water)" stroke="#9fd3cf" strokeWidth="1.4" strokeLinejoin="round" />
-              {scene.islands.map((i, k) => (
-                <circle key={k} cx={i.at.x} cy={i.at.y} r={i.r} fill="#bfe0b8" stroke="#a6d29d" strokeWidth="0.5" />
+              <polygon points={pts(scene.pond)} fill={C.water} stroke={C.waterEdge} strokeWidth="1.2" strokeLinejoin="round" />
+              {scene.islands.map((i, n) => (
+                <circle key={n} cx={i.at.x} cy={i.at.y} r={i.r} fill={C.woods} />
               ))}
 
               {/* property line */}
-              <polygon points={pts(scene.ground)} fill="none" stroke="#1f9285" strokeOpacity="0.55" strokeWidth="0.9" strokeDasharray="4 2.5" strokeLinejoin="round" />
+              <polygon points={pts(scene.ground)} fill="none" stroke="#1f9285" strokeOpacity="0.4" strokeWidth="0.8" strokeDasharray="4 2.5" strokeLinejoin="round" />
 
               {/* entrance / exit arrows on the drives */}
               {scene.gates.map((g) => (
-                <polygon
-                  key={`a${g.id}`}
-                  points={pts(g.arrow)}
-                  fill={g.dir === 'in' ? '#12a37a' : '#f0483e'}
-                  stroke="#ffffff"
-                  strokeWidth="0.6"
-                  strokeLinejoin="round"
-                />
+                <polygon key={`a${g.id}`} points={pts(g.arrow)} fill={g.dir === 'in' ? '#12a37a' : '#f0483e'} stroke="#ffffff" strokeWidth="0.6" strokeLinejoin="round" />
               ))}
 
-              {/* low roofs (walkways, pavilion, drop-off) and the older buildings */}
-              {scene.structures.map((st) => (
-                <g key={st.id} aria-hidden="true">
-                  {st.walls
-                    .filter((w) => w.front < 0)
-                    .map((w, i) => (
-                      <polygon key={i} points={pts(w.q)} fill={mix(st.color, '#0d2b28', 0.28)} stroke={mix(st.color, '#0d2b28', 0.28)} strokeWidth="0.2" />
-                    ))}
-                  <polygon points={pts(st.roof)} fill={st.color} stroke={mix(st.color, '#ffffff', 0.5)} strokeWidth="0.5" strokeLinejoin="round" />
-                </g>
-              ))}
-
-              {/* trees: shadow, trunk, canopy */}
-              {scene.trees.map((tr, i) => (
-                <g key={`t${i}`}>
-                  <ellipse cx={tr.g.x + 1} cy={tr.g.y + 0.6} rx="2.6" ry="1.5" fill="rgb(16 40 38 / 0.12)" />
-                  <line x1={tr.g.x} y1={tr.g.y} x2={tr.top.x} y2={tr.top.y} stroke="#8a6f55" strokeWidth="0.6" />
-                  <circle cx={tr.top.x} cy={tr.top.y} r="2.7" fill="#7cc383" stroke="#5fae69" strokeWidth="0.4" />
-                  <circle cx={tr.top.x - 0.8} cy={tr.top.y - 0.8} r="1.1" fill="#a3d9a6" />
-                </g>
-              ))}
-
-              {/* ground shadows */}
-              {cam.lift > 0.02 &&
-                scene.buildings.map((b) => (
-                  <polygon
-                    key={`s${b.name}`}
-                    points={pts(b.outline.map((p) => scene.P([p[0] + 1.6 * cam.lift, p[1] + 1.6 * cam.lift])))}
-                    fill="rgb(16 40 38 / 0.10)"
-                  />
+              {/* map text: road name, car parks, pond */}
+              <g fontFamily="inherit" textAnchor="middle" dominantBaseline="middle">
+                {scene.roadName && (
+                  <text
+                    x={scene.roadName.p.x}
+                    y={scene.roadName.p.y}
+                    transform={`rotate(${scene.roadName.angle.toFixed(1)} ${scene.roadName.p.x.toFixed(1)} ${scene.roadName.p.y.toFixed(1)})`}
+                    fontSize="4"
+                    fontStyle="italic"
+                    fontWeight="600"
+                    fill="#9aa6a4"
+                    letterSpacing="0.3"
+                  >
+                    {t(scene.roadName.name)}
+                  </text>
+                )}
+                {scene.lots.map((l) => (
+                  <text
+                    key={`t${l.id}`}
+                    x={l.label.x}
+                    y={l.label.y}
+                    transform={`rotate(${l.angle.toFixed(1)} ${l.label.x.toFixed(1)} ${l.label.y.toFixed(1)})`}
+                    fontSize={l.big ? 3.8 : 3.4}
+                    fontWeight="800"
+                    fill="#ffffff"
+                    letterSpacing="0.2"
+                  >
+                    {l.big ? `P  ${t('ลานจอดรถ')}` : 'P'}
+                  </text>
                 ))}
+                {scene.landmarks.map((l) => (
+                  <text key={l.id} x={l.p.x} y={l.p.y} fontSize="4" fontStyle="italic" fontWeight="700" fill="#5d9db2" letterSpacing="0.4">
+                    {t(l.name)}
+                  </text>
+                ))}
+              </g>
 
-              {/* buildings, back to front */}
-              {scene.buildings.map((b) => (
+              {/* soft ground shadows */}
+              {cam.lift > 0.02 && (
+                <g fill="rgb(16 40 38 / 0.09)">
+                  {scene.solids.map((b) => b.shadow && <polygon key={`s${b.id}`} points={pts(b.shadow)} />)}
+                </g>
+              )}
+
+              {/* buildings + low roofs, back to front */}
+              {scene.solids.map((b) => (
                 <g
-                  key={b.name}
+                  key={b.id}
                   data-zone={b.isShop ? b.code : undefined}
                   role={b.isShop ? 'button' : undefined}
                   tabIndex={b.isShop && started ? 0 : -1}
                   aria-label={b.isShop ? zoneName(b.code) || t(b.name) : undefined}
+                  aria-hidden={b.isShop ? undefined : true}
                   aria-pressed={b.isShop ? selected === b.code : undefined}
-                  onClick={() => started && b.isShop && onSelect?.(selected === b.code ? '' : b.code)}
-                  onKeyDown={(e) => started && b.isShop && (e.key === 'Enter' || e.key === ' ') && onSelect?.(selected === b.code ? '' : b.code)}
+                  onClick={() => b.isShop && pick(b.code)}
+                  onKeyDown={(e) => b.isShop && (e.key === 'Enter' || e.key === ' ') && pick(b.code)}
                   onMouseEnter={() => b.isShop && setHover(b.code)}
                   onMouseLeave={() => setHover('')}
                   className={`outline-none ${started && b.isShop ? 'cursor-pointer' : ''}`}
@@ -472,133 +454,119 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                   ))}
                   <polygon
                     points={pts(b.roof)}
-                    fill={b.isShop ? mix(b.color, '#ffffff', b.lit ? 0.02 : 0.12) : b.color}
-                    stroke={b.lit ? '#ffffff' : mix(b.color, '#ffffff', 0.45)}
-                    strokeWidth={b.lit ? 1.1 : 0.6}
+                    fill={b.roofFill}
+                    stroke={b.lit ? '#ffffff' : mix(b.color, '#ffffff', 0.35)}
+                    strokeWidth={b.lit ? 1.1 : 0.5}
                     strokeLinejoin="round"
                   />
-                  {b.kind === 'parking' && (
-                    <g stroke="#ffffff" strokeWidth="0.45" opacity="0.85">
-                      <clipPath id="mm-park-roof">
+                  {(b.units.length > 0 || b.stripes.length > 0) && (
+                    <>
+                      <clipPath id={`${uid}-${b.id}`}>
                         <polygon points={pts(b.roof)} />
                       </clipPath>
-                      <g clipPath="url(#mm-park-roof)">
-                        {scene.stripes.map(([a, z], i) => (
-                          <line key={i} x1={a.x} y1={a.y} x2={z.x} y2={z.y} />
+                      <g clipPath={`url(#${uid}-${b.id})`}>
+                        {b.units.map((u, i) => (
+                          <polygon key={i} points={pts(u.q)} fill={u.fill} />
                         ))}
+                        {b.stripes.length > 0 && (
+                          <g stroke="#ffffff" strokeWidth="0.32" opacity="0.85">
+                            {b.stripes.map(([a, z], i) => (
+                              <line key={i} x1={a.x} y1={a.y} x2={z.x} y2={z.y} />
+                            ))}
+                          </g>
+                        )}
                       </g>
-                    </g>
+                    </>
                   )}
                 </g>
               ))}
-
             </svg>
 
-            {/* name pins – HTML on top of the map (real text layout, same size at every zoom) */}
-            {size.w > 0 &&
-              scene.buildings.map((b) => {
-                const k = Math.min(size.w / box.w, size.h / box.h)
-                const left = (size.w - box.w * k) / 2 + (b.pin.x - box.x) * k
-                const top = (size.h - box.h * k) / 2 + (b.pin.y - box.y) * k
-                const n = b.isShop ? counts[b.code] || 0 : 0
-                const color = b.isShop ? ZONE_COLORS[b.code] || '#138377' : '#2f6fd6'
-                // small map (phones): badge only, the name shows on the selected / hovered building
-                const showName = !compact || b.lit
-                return (
-                  <button
-                    key={`pin${b.name}`}
-                    type="button"
-                    data-zone={b.isShop ? b.code : 'parking'}
-                    tabIndex={-1}
-                    aria-hidden="true"
-                    onClick={() => started && b.isShop && onSelect?.(selected === b.code ? '' : b.code)}
-                    onMouseEnter={() => b.isShop && setHover(b.code)}
-                    onMouseLeave={() => setHover('')}
-                    className={`absolute flex flex-col items-center transition-opacity duration-300 ${
-                      started && b.isShop ? 'cursor-pointer' : 'cursor-default'
-                    } ${b.dim ? 'opacity-50' : ''}`}
-                    style={{
-                      left,
-                      top,
-                      transform: `translate(-50%, -100%) translateY(${b.lit ? -4 : 0}px) scale(${1 / zoom})`,
-                      transformOrigin: '50% 100%',
-                      zIndex: Math.round(b.depth + 1000),
-                    }}
-                  >
+            {/* building pins – HTML on top of the map (real text, same size at every zoom) */}
+            {k > 0 &&
+              scene.solids
+                .filter((b) => b.isShop || b.kind === 'parking')
+                .map((b) => {
+                  const n = b.isShop ? counts[b.code] || 0 : 0
+                  const color = b.isShop ? ZONE_COLORS[b.code] || '#138377' : '#5b6669'
+                  // small map (phones): tile only, the name shows on the selected / hovered building
+                  const showName = !compact || b.lit
+                  return (
                     <span
-                      className={`flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white py-[3px] pl-[3px] text-[11px] font-bold text-[#24413d] shadow-[0_4px_12px_-4px_rgb(16_40_38/0.45)] ring-1 ring-black/5 transition ${
-                        n > 0 || !showName ? 'pr-[3px]' : 'pr-2.5'
-                      } ${b.lit ? 'ring-2' : ''}`}
-                      style={b.lit ? { '--tw-ring-color': color } : undefined}
+                      key={`pin${b.id}`}
+                      className="absolute size-0"
+                      style={{ ...toPx(b.pin), transform: `scale(${1 / zoom})`, transformOrigin: '0 0', zIndex: Math.round(b.depth + 1000) }}
                     >
-                      <span className="grid size-[18px] place-items-center rounded-full text-[9px] font-black text-white" style={{ backgroundColor: color }}>
-                        {b.isShop ? (b.code === 'MK' ? <Store className="size-[11px]" strokeWidth={2.6} /> : b.code) : 'P'}
-                      </span>
-                      {showName && t(b.name)}
-                      {n > 0 && showName && (
+                      <button
+                        type="button"
+                        data-zone={b.isShop ? b.code : 'parking'}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        onClick={() => b.isShop && pick(b.code)}
+                        onMouseEnter={() => b.isShop && setHover(b.code)}
+                        onMouseLeave={() => setHover('')}
+                        className={`absolute bottom-[5px] flex items-center gap-1.5 transition duration-300 ${compact ? 'left-[-12px]' : 'left-[-15px]'} ${
+                          started && b.isShop ? 'cursor-pointer' : 'cursor-default'
+                        } ${b.dim ? 'opacity-45' : ''} ${b.lit ? '-translate-y-1' : ''}`}
+                      >
                         <span
-                          className="grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10px] font-black text-white"
-                          style={{ backgroundColor: color }}
-                          title={t('{n} ร้าน', { n })}
+                          className={`relative shrink-0 bg-white shadow-[0_6px_14px_-6px_rgb(16_40_38/0.55)] ring-1 ring-black/5 transition ${
+                            compact ? 'size-[24px] rounded-[7px] p-[2px]' : 'size-[30px] rounded-[9px] p-[3px]'
+                          } ${b.lit ? 'ring-2' : ''}`}
+                          style={b.lit ? { '--tw-ring-color': color } : undefined}
                         >
-                          {n}
+                          {/* pointer under the tile */}
+                          <span className="absolute left-1/2 top-full -mt-[6px] size-2.5 -translate-x-1/2 rotate-45 bg-white" />
+                          <span
+                            className={`relative grid size-full place-items-center font-black text-white ${compact ? 'rounded-[5px] text-[8.5px]' : 'rounded-[6px] text-[10.5px]'}`}
+                            style={{ backgroundColor: color }}
+                          >
+                            {b.code === 'MK' ? <Store className={compact ? 'size-[11px]' : 'size-[13px]'} strokeWidth={2.6} /> : b.isShop ? b.code : 'P'}
+                          </span>
+                          {n > 0 && (
+                            <span
+                              className="absolute -right-2 -top-2 grid h-[17px] min-w-[17px] place-items-center rounded-full px-1 text-[9.5px] font-black text-white ring-2 ring-white"
+                              style={{ backgroundColor: color }}
+                              title={t('{n} ร้าน', { n })}
+                            >
+                              {n}
+                            </span>
+                          )}
                         </span>
-                      )}
+                        {showName && (
+                          <span
+                            className="whitespace-nowrap text-[11.5px] font-extrabold leading-none text-[#24413d] [text-shadow:0_0_2px_#fff,0_0_3px_#fff,0_0_4px_#fff,0_0_6px_#fff]"
+                            style={b.lit ? { color } : undefined}
+                          >
+                            {t(b.name)}
+                          </span>
+                        )}
+                      </button>
                     </span>
-                    <span className="-mt-[5px] size-2.5 rotate-45 bg-white shadow-[2px_2px_3px_-1px_rgb(16_40_38/0.25)]" />
-                  </button>
+                  )
+                })}
+
+            {/* entrances / exits */}
+            {k > 0 &&
+              scene.gates.map((g) => {
+                const isIn = g.dir === 'in'
+                const Icon = isIn ? LogIn : LogOut
+                return (
+                  <span
+                    key={g.id}
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute flex items-center gap-1 whitespace-nowrap rounded-full bg-white/95 py-[2px] pl-[2px] text-[10px] font-bold shadow-[0_3px_10px_-4px_rgb(16_40_38/0.45)] ring-1 ring-black/5 ${
+                      isIn ? 'text-[#0f7a5c]' : 'text-[#c8322a]'
+                    } ${compact ? 'pr-[2px]' : 'pr-2'}`}
+                    style={{ ...toPx(g.p), transform: `translate(-50%, -50%) scale(${1 / zoom})`, zIndex: 950 }}
+                  >
+                    <span className={`grid size-[16px] place-items-center rounded-full text-white ${isIn ? 'bg-[#12a37a]' : 'bg-[#f0483e]'}`}>
+                      <Icon className="size-[10px]" strokeWidth={2.6} />
+                    </span>
+                    {!compact && t(isIn ? 'ทางเข้า' : 'ทางออก')}
+                  </span>
                 )
               })}
-            {/* entrances, car parks, pond */}
-            {size.w > 0 &&
-              (() => {
-                const k = Math.min(size.w / box.w, size.h / box.h)
-                const at = (p) => ({
-                  left: (size.w - box.w * k) / 2 + (p.x - box.x) * k,
-                  top: (size.h - box.h * k) / 2 + (p.y - box.y) * k,
-                })
-                const chip = 'pointer-events-none absolute flex items-center gap-1 whitespace-nowrap rounded-full bg-white/95 py-[2px] pl-[2px] text-[10px] font-bold shadow-[0_3px_10px_-4px_rgb(16_40_38/0.45)] ring-1 ring-black/5'
-                const style = (p, z = 900) => ({ ...at(p), transform: `translate(-50%, -50%) scale(${1 / zoom})`, zIndex: z })
-                return (
-                  <>
-                    {scene.gates.map((g) => {
-                      const isIn = g.dir === 'in'
-                      const Icon = isIn ? LogIn : LogOut
-                      return (
-                        <span
-                          key={g.id}
-                          aria-hidden="true"
-                          className={`${chip} ${isIn ? 'text-[#0f7a5c]' : 'text-[#c8322a]'} ${compact ? 'pr-[2px]' : 'pr-2'}`}
-                          style={style(g.p, 950)}
-                        >
-                          <span className={`grid size-[16px] place-items-center rounded-full text-white ${isIn ? 'bg-[#12a37a]' : 'bg-[#f0483e]'}`}>
-                            <Icon className="size-[10px]" strokeWidth={2.6} />
-                          </span>
-                          {!compact && t(isIn ? 'ทางเข้า' : 'ทางออก')}
-                        </span>
-                      )
-                    })}
-                    {scene.lots.map((l) => {
-                      // the big open-air lots get a name, the small yards just the P
-                      const named = !compact && (l.id === 'front' || l.id === 'east-yard')
-                      return (
-                        <span key={l.id} aria-hidden="true" className={`${chip} text-[#2f6fd6] ${named ? 'pr-2' : 'pr-[2px]'}`} style={style(l.label, 800)}>
-                          <span className="grid size-[16px] place-items-center rounded-full bg-[#2f6fd6] text-[9px] font-black text-white">P</span>
-                          {named && t('ลานจอดรถ')}
-                        </span>
-                      )
-                    })}
-                    {scene.landmarks.map((l) => (
-                      <span key={l.id} aria-hidden="true" className={`${chip} pr-2 text-[#1a8aa6]`} style={style(l.p)}>
-                        <span className="grid size-[16px] place-items-center rounded-full bg-[#29a8c8] text-white">
-                          <Waves className="size-[10px]" strokeWidth={2.6} />
-                        </span>
-                        {t(l.name)}
-                      </span>
-                    ))}
-                  </>
-                )
-              })()}
           </div>
 
           {/* "start" overlay – minimal: a round icon + one line of text, tap anywhere to use the map */}

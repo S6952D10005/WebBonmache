@@ -14,6 +14,9 @@ export const zones = [
   { code: 'F', name: 'อาคาร F · สุขภาพ & บริการ' },
   { code: 'G', name: 'อาคาร G' },
   { code: 'H', name: 'อาคาร H' },
+  { code: 'D', name: 'อาคาร D' },
+  { code: 'M', name: 'อาคาร M' },
+  { code: 'N', name: 'อาคาร N' },
 ]
 
 export const directoryShops = [
@@ -50,5 +53,5 @@ export const directoryShops = [
  */
 export const buildings = [
   { code: 'market', name: 'Fresh Market', label: 'ตลาดสด & ฟู้ดคอร์ท', zones: ['MK', 'A'] },
-  { code: 'plaza', name: 'Bon Marché Plaza', label: 'คาเฟ่ · แฟชั่น · สุขภาพ', zones: ['BC', 'E', 'F', 'G', 'H'] },
+  { code: 'plaza', name: 'Bon Marché Plaza', label: 'คาเฟ่ · แฟชั่น · สุขภาพ', zones: ['BC', 'D', 'E', 'F', 'G', 'H', 'M', 'N'] },
 ]
