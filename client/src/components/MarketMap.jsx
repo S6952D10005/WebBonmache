@@ -56,7 +56,7 @@ const C = {
   wallShade: '#0d2b28',
 }
 
-const HEIGHT_SCALE = 1.25 // buildings a little taller than real so the 3D reads well
+const HEIGHT_SCALE = 1 // real height – low blocks keep neighbouring buildings from hiding each other
 const PITCH_3D = (52 * Math.PI) / 180
 // starting view: turned so the market and the main road are on the right, the car-park building on the left
 const START_BEARING = (-63 * Math.PI) / 180

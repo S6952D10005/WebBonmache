@@ -63,6 +63,12 @@ const BUILDINGS = [
  */
 const ORIGIN = { x: 367.7, y: 334.1 }
 
+/*
+ * buildings that touch in the drawing but should read as separate blocks on the map:
+ * the shared wall is moved back on both sides so a gap (metres) shows between them
+ */
+const GAPS = [['อาคาร D', 'อาคารจอดรถ', 5]]
+
 /* ---------------- read the DWG ---------------- */
 const { segs } = await readGroups(DWG)
 
@@ -95,8 +101,41 @@ for (const b of BUILDINGS) {
   const outline = simplify(loop).map(toMap)
   if (signedArea(outline) < 0) outline.reverse() // clockwise on screen
   const height = b.level ?? wallHeight(segs.get(b.group))
-  buildings.push({ code: b.code, kind: b.kind, name: b.name, height, label: labelPoint(outline).map(r1), outline })
+  buildings.push({ code: b.code, kind: b.kind, name: b.name, height, outline })
 }
+
+/* ---------------- gaps between touching buildings ---------------- */
+// walls of `a` that lie along a wall of `b` move away from `b` by `d` (both corners of that wall)
+function moveOffWall(a, b, d) {
+  const out = a.outline.map((p) => [...p])
+  const near = ([x, y], [ax, ay], [bx, by]) => {
+    const len = Math.hypot(bx - ax, by - ay) || 1
+    const t = ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / len ** 2
+    return t > -0.01 && t < 1.01 && Math.abs((x - ax) * (by - ay) - (y - ay) * (bx - ax)) / len < 0.3
+  }
+  a.outline.forEach((p, i) => {
+    const q = a.outline[(i + 1) % a.outline.length]
+    for (let k = 0; k < b.outline.length; k++) {
+      const e0 = b.outline[k]
+      const e1 = b.outline[(k + 1) % b.outline.length]
+      if (!near(p, e0, e1) || !near(q, e0, e1)) continue
+      // b is clockwise on screen, so its outward normal is (dy, -dx)
+      const len = Math.hypot(e1[0] - e0[0], e1[1] - e0[1])
+      const n = [(e1[1] - e0[1]) / len, -(e1[0] - e0[0]) / len]
+      for (const j of [i, (i + 1) % a.outline.length]) out[j] = [r1(a.outline[j][0] + n[0] * d), r1(a.outline[j][1] + n[1] * d)]
+    }
+  })
+  return out
+}
+for (const [na, nb, gap] of GAPS) {
+  const a = buildings.find((b) => b.name === na)
+  const b = buildings.find((x) => x.name === nb)
+  if (!a || !b) continue
+  const movedA = moveOffWall(a, b, gap / 2)
+  b.outline = moveOffWall(b, a, gap / 2)
+  a.outline = movedA
+}
+buildings.forEach((b) => (b.label = labelPoint(b.outline).map(r1)))
 
 const xs = buildings.flatMap((b) => b.outline.map((p) => p[0]))
 const ys = buildings.flatMap((b) => b.outline.map((p) => p[1]))
