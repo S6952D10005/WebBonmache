@@ -58,7 +58,13 @@ const C = {
 
 const HEIGHT_SCALE = 1.25 // buildings a little taller than real so the 3D reads well
 const PITCH_3D = (52 * Math.PI) / 180
-const START_BEARING = (-18 * Math.PI) / 180
+// starting view: turned so the market and the main road are on the right, the car-park building on the left
+const START_BEARING = (-63 * Math.PI) / 180
+const ZOOM_MIN = 0.75
+const ZOOM_MAX = 4
+const clampZoom = (z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z))
+// how the map moves to a new zoom / position: buttons glide, the mouse wheel follows quickly, dragging is instant
+const EASE = { smooth: 'duration-500', quick: 'duration-150', none: 'duration-0' }
 const QUARTER = Math.PI / 4
 
 /* ---------- small colour helpers ---------- */
@@ -145,7 +151,41 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [hover, setHover] = useState('')
+  const [ease, setEase] = useState('smooth')
   const drag = useRef(null)
+  const canvas = useRef(null)
+  // latest zoom / position for the wheel handler (it can fire several times between renders)
+  const view = useRef({ zoom, pan })
+  useEffect(() => {
+    view.current = { zoom, pan }
+  }, [zoom, pan])
+
+  /*
+   * mouse wheel / touchpad pinch = zoom in / out around the pointer – only after the
+   * map was clicked (before that the wheel scrolls the page as usual)
+   */
+  useEffect(() => {
+    const el = canvas.current
+    if (!el || !started) return
+    const onWheel = (e) => {
+      e.preventDefault() // keep the page still while zooming the map
+      const r = el.getBoundingClientRect()
+      // pointer position, measured from the middle of the map (the zoom origin)
+      const m = { x: e.clientX - r.left - r.width / 2, y: e.clientY - r.top - r.height / 2 }
+      const { zoom: z, pan: p } = view.current
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY
+      const z2 = clampZoom(z * Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)))
+      if (Math.abs(z2 - z) < 1e-4) return
+      // move the map so the spot under the pointer stays under the pointer
+      const p2 = { x: m.x - ((m.x - p.x) * z2) / z, y: m.y - ((m.y - p.y) * z2) / z }
+      view.current = { zoom: z2, pan: p2 }
+      setEase('quick')
+      setZoom(z2)
+      setPan(p2)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [started])
 
   // size of the map box (to place the HTML name pins over the SVG)
   const stage = useRef(null)
@@ -153,7 +193,9 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
   useEffect(() => {
     const el = stage.current
     if (!el) return
-    const ro = new ResizeObserver(() => setSize({ w: el.offsetWidth, h: el.offsetHeight }))
+    const measure = () => setSize({ w: el.offsetWidth, h: el.offsetHeight })
+    measure() // right away – don't wait for the observer's first call
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
@@ -161,7 +203,12 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
   const target = useMemo(() => ({ pitch: mode3d ? PITCH_3D : 0, bearing, lift: mode3d ? 1 : 0 }), [mode3d, bearing])
   const cam = useCamera(target)
 
+  const zoomBy = (step) => {
+    setEase('smooth')
+    setZoom((z) => clampZoom(+(z + step).toFixed(2)))
+  }
   const reset = () => {
+    setEase('smooth')
     setZoom(1)
     setPan({ x: 0, y: 0 })
     setBearing(START_BEARING)
@@ -170,7 +217,8 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
 
   const onPointerDown = (e) => {
     if (!started || e.target.closest('[data-zone]')) return
-    drag.current = { x: e.clientX, y: e.clientY, pan }
+    drag.current = { x: e.clientX, y: e.clientY, pan: view.current.pan }
+    setEase('none')
     e.currentTarget.setPointerCapture(e.pointerId)
   }
   const onPointerMove = (e) => {
@@ -244,12 +292,10 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
     const xs = all.map((p) => p.x)
     const ys = all.map((p) => p.y)
     const pad = 8
-    const box = {
-      x: Math.min(...xs) - pad,
-      y: Math.min(...ys) - pad - 12,
-      w: Math.max(...xs) - Math.min(...xs) + pad * 2,
-      h: Math.max(...ys) - Math.min(...ys) + pad * 2 + 12,
-    }
+    const w = Math.max(...xs) - Math.min(...xs) + pad * 2
+    const h = Math.max(...ys) - Math.min(...ys) + pad * 2 + 12
+    // framing as approved: the site sits a little right of and below the middle of the box
+    const box = { x: Math.min(...xs) - pad - w * 0.017, y: Math.min(...ys) - pad - 12 - h * 0.035, w, h }
 
     const main = SITE.roads.find((r) => r.kind === 'main')
     return {
@@ -310,6 +356,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
       <div className="relative overflow-clip rounded-[24px] border border-[#e6eaea]" style={{ backgroundColor: C.ground }}>
         {/* map canvas */}
         <div
+          ref={canvas}
           className={`relative aspect-[1000/540] min-h-[420px] w-full touch-none select-none ${started ? 'cursor-grab active:cursor-grabbing' : ''}`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -318,7 +365,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
         >
           <div
             ref={stage}
-            className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className={`absolute inset-0 transition-transform ease-[cubic-bezier(0.22,1,0.36,1)] ${EASE[ease]}`}
             style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
           >
             <svg
@@ -595,8 +642,8 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
           <>
             <div className="absolute right-3 top-3 flex flex-col gap-1.5">
               {[
-                [Plus, t('ซูมเข้า'), () => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))],
-                [Minus, t('ซูมออก'), () => setZoom((z) => Math.max(0.75, +(z - 0.25).toFixed(2)))],
+                [Plus, t('ซูมเข้า'), () => zoomBy(0.25)],
+                [Minus, t('ซูมออก'), () => zoomBy(-0.25)],
                 [RotateCcw, t('หมุนซ้าย'), () => setBearing((b) => b + QUARTER)],
                 [RotateCw, t('หมุนขวา'), () => setBearing((b) => b - QUARTER)],
                 [Undo2, t('รีเซ็ตแผนที่'), reset],
@@ -651,6 +698,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
 
         <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10.5px] font-medium text-[#7a8785] shadow-sm">
           {t('แผนผังตลาดบอนมาร์เช่')} · {t('กดที่อาคารเพื่อดูร้าน')}
+          {started && <span className="hidden lg:inline"> · {t('เลื่อนลูกกลิ้งเมาส์เพื่อซูม')}</span>}
         </span>
       </div>
     </div>

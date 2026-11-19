@@ -324,6 +324,7 @@ export const DICT = {
   'สระน้ำ': ['Pond', '水池'],
   'ลานจอดรถ': ['Parking', '停车场'],
   'แผนผังตลาดบอนมาร์เช่': ['Bon Marché market plan', 'Bon Marché 市场平面图'],
+  'เลื่อนลูกกลิ้งเมาส์เพื่อซูม': ['Scroll to zoom', '滚动鼠标滚轮缩放'],
   'กดที่อาคารเพื่อดูร้าน': ['Tap a building to see its shops', '点击建筑查看店铺'],
   'หมุนซ้าย': ['Rotate left', '向左旋转'],
   'หมุนขวา': ['Rotate right', '向右旋转'],
