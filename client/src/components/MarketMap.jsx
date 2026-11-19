@@ -3,7 +3,7 @@ import { Box, LogIn, LogOut, Minus, Plus, Pointer, RotateCcw, RotateCw, Square, 
 import { useI18n } from '../i18n'
 import { PLAN } from '../data/marketPlan'
 import { SITE } from '../data/marketSite'
-import { lotBays, neighbourhoodBlocks, parkingStripes, roofUnits } from './marketMapGeometry'
+import { lotBays, neighbourhoodBlocks, roofUnits } from './marketMapGeometry'
 
 /*
  * ===========================================================================
@@ -18,7 +18,7 @@ import { lotBays, neighbourhoodBlocks, parkingStripes, roofUnits } from './marke
  *  The 3D look is drawn by hand in SVG (no 3D library): every corner is turned /
  *  tilted with the camera, walls are drawn back-to-front, then the roofs with
  *  their shop units, and the name pins (HTML) on top.
- *   - light grey city map around the market, white roads, dark grey car parks
+ *   - light grey city map around the market, white roads, dark grey open-air car parks
  *   - shop roofs show rows of units (decorative floor plan, marketMapGeometry.js)
  *   - 2D (straight down) / 3D (tilted), rotate, zoom, drag, reset – animated
  * ===========================================================================
@@ -35,6 +35,7 @@ export const ZONE_COLORS = {
   G: '#8cc63f',
   H: '#f0483e',
   M: '#3d6bd9',
+  P: '#5f7d8c', // อาคารจอดรถ (car-park building)
   N: '#a47551',
 }
 
@@ -51,7 +52,6 @@ const C = {
   kerb: '#d5dbdb',
   water: '#cfe6ee',
   waterEdge: '#b4d6e1',
-  parking: '#97a1a3',
   other: '#dde2e2',
   wallShade: '#0d2b28',
 }
@@ -101,9 +101,8 @@ const SOLIDS = [
     ...b,
     id: `b${i}`,
     units: b.kind === 'shop' ? roofUnits(b.outline, i + 1) : [],
-    stripes: b.kind === 'parking' ? parkingStripes(b.outline) : [],
   })),
-  ...SITE.structures.map((s) => ({ ...s, id: s.id, kind: 'roof', outline: clockwise(s.outline), units: [], stripes: [] })),
+  ...SITE.structures.map((s) => ({ ...s, id: s.id, kind: 'roof', outline: clockwise(s.outline), units: [] })),
 ]
 const BLOCKS = neighbourhoodBlocks(SITE)
 const LOTS = SITE.parking.map((l) => ({ ...l, ...lotBays(l), big: l.id === 'front' || l.id === 'east-yard' }))
@@ -243,7 +242,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
       const dim = Boolean(selected) && selected !== b.code
       const tall = b.kind === 'roof' ? 0.75 : 1 // traced low roofs (walkways, drop-off) stay low
       const h = b.height * HEIGHT_SCALE * tall * cam.lift + (lit ? 3 * cam.lift + 0.001 : 0)
-      const base = isShop ? ZONE_COLORS[b.code] || '#138377' : b.kind === 'parking' ? C.parking : b.color || C.other
+      const base = isShop ? ZONE_COLORS[b.code] || '#138377' : b.color || C.other
       const color = dim ? mix(base, '#e9ecec', isShop ? 0.72 : 0.35) : base
 
       const n = b.outline.length
@@ -277,9 +276,8 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
         walls,
         roof,
         // shop roofs: light floor with coloured units on it (the floor-plan look)
-        roofFill: isShop ? mix(color, '#ffffff', 0.72) : b.kind === 'parking' ? color : mix(color, '#ffffff', 0.25),
+        roofFill: isShop ? mix(color, '#ffffff', 0.72) : mix(color, '#ffffff', 0.25),
         units: b.units.map((u) => ({ q: u.q.map((p) => P(p, h)), fill: mix(color, '#ffffff', 0.04 + u.tone * 0.3) })),
-        stripes: b.stripes.map(([a, z]) => [P(a, h), P(z, h)]),
         shadow: h > 0.05 ? b.outline.map((p) => P([p[0] + 0.25 * h, p[1] + 0.25 * h])) : null,
         pin: P(b.label || b.outline[0], h),
         depth: roof.reduce((sum, p) => sum + p.d, 0) / roof.length,
@@ -428,9 +426,6 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                 <circle key={n} cx={i.at.x} cy={i.at.y} r={i.r} fill={C.woods} />
               ))}
 
-              {/* property line */}
-              <polygon points={pts(scene.ground)} fill="none" stroke="#1f9285" strokeOpacity="0.4" strokeWidth="0.8" strokeDasharray="4 2.5" strokeLinejoin="round" />
-
               {/* entrance / exit arrows on the drives */}
               {scene.gates.map((g) => (
                 <polygon key={`a${g.id}`} points={pts(g.arrow)} fill={g.dir === 'in' ? '#12a37a' : '#f0483e'} stroke="#ffffff" strokeWidth="0.6" strokeLinejoin="round" />
@@ -506,7 +501,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                     strokeWidth={b.lit ? 1.1 : 0.5}
                     strokeLinejoin="round"
                   />
-                  {(b.units.length > 0 || b.stripes.length > 0) && (
+                  {b.units.length > 0 && (
                     <>
                       <clipPath id={`${uid}-${b.id}`}>
                         <polygon points={pts(b.roof)} />
@@ -515,13 +510,6 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                         {b.units.map((u, i) => (
                           <polygon key={i} points={pts(u.q)} fill={u.fill} />
                         ))}
-                        {b.stripes.length > 0 && (
-                          <g stroke="#ffffff" strokeWidth="0.32" opacity="0.85">
-                            {b.stripes.map(([a, z], i) => (
-                              <line key={i} x1={a.x} y1={a.y} x2={z.x} y2={z.y} />
-                            ))}
-                          </g>
-                        )}
                       </g>
                     </>
                   )}
@@ -532,10 +520,10 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
             {/* building pins – HTML on top of the map (real text, same size at every zoom) */}
             {k > 0 &&
               scene.solids
-                .filter((b) => b.isShop || b.kind === 'parking')
+                .filter((b) => b.isShop)
                 .map((b) => {
-                  const n = b.isShop ? counts[b.code] || 0 : 0
-                  const color = b.isShop ? ZONE_COLORS[b.code] || '#138377' : '#5b6669'
+                  const n = counts[b.code] || 0
+                  const color = ZONE_COLORS[b.code] || '#138377'
                   // small map (phones): tile only, the name shows on the selected / hovered building
                   const showName = !compact || b.lit
                   return (
@@ -546,14 +534,14 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                     >
                       <button
                         type="button"
-                        data-zone={b.isShop ? b.code : 'parking'}
+                        data-zone={b.code}
                         tabIndex={-1}
                         aria-hidden="true"
-                        onClick={() => b.isShop && pick(b.code)}
-                        onMouseEnter={() => b.isShop && setHover(b.code)}
+                        onClick={() => pick(b.code)}
+                        onMouseEnter={() => setHover(b.code)}
                         onMouseLeave={() => setHover('')}
                         className={`absolute bottom-[5px] flex items-center gap-1.5 transition duration-300 ${compact ? 'left-[-12px]' : 'left-[-15px]'} ${
-                          started && b.isShop ? 'cursor-pointer' : 'cursor-default'
+                          started ? 'cursor-pointer' : 'cursor-default'
                         } ${b.dim ? 'opacity-45' : ''} ${b.lit ? '-translate-y-1' : ''}`}
                       >
                         <span
@@ -568,7 +556,7 @@ export default function MarketMap({ zones = [], counts = {}, selected = '', onSe
                             className={`relative grid size-full place-items-center font-black text-white ${compact ? 'rounded-[5px] text-[8.5px]' : 'rounded-[6px] text-[10.5px]'}`}
                             style={{ backgroundColor: color }}
                           >
-                            {b.code === 'MK' ? <Store className={compact ? 'size-[11px]' : 'size-[13px]'} strokeWidth={2.6} /> : b.isShop ? b.code : 'P'}
+                            {b.code === 'MK' ? <Store className={compact ? 'size-[11px]' : 'size-[13px]'} strokeWidth={2.6} /> : b.code}
                           </span>
                           {n > 0 && (
                             <span

@@ -139,21 +139,3 @@ export function lotBays(lot) {
   const [a, b] = lot.rows[0] || [[0, 0], [1, 0]]
   return { lines, dir: [a, b] }
 }
-
-/* ======================================================================== */
-/*  Stall lines on the car-park building roof: pairs of 5 m stall rows      */
-/*  around a 6 m driving lane, repeated across the roof (clipped when drawn) */
-/* ======================================================================== */
-export function parkingStripes(outline) {
-  const xs = outline.map((p) => p[0])
-  const ys = outline.map((p) => p[1])
-  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]
-  const lines = []
-  for (let y = y0 + 1; y + 5 <= y1 - 0.5; y += 16)
-    for (const [s0, s1] of [[y, y + 5], [y + 11, y + 16]]) {
-      if (s1 > y1 - 0.5) continue
-      lines.push([[x0 + 1, s0], [x1 - 1, s0]], [[x0 + 1, s1], [x1 - 1, s1]])
-      for (let x = x0 + 1; x <= x1 - 1; x += 2.6) lines.push([[x, s0], [x, s1]])
-    }
-  return lines
-}

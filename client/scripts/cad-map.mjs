@@ -30,7 +30,6 @@ const OUT = path.join(ROOT, 'src/data/marketPlan.js')
  * drawing group → building on the map
  *   code  : zone code (same as shop_zones.code / shops.zone); null = not a shop zone
  *   kind  : 'shop'    coloured, tap to filter the shop list
- *           'parking' grey with parking stripes on the roof
  *           'other'   small light-grey structure (pavilion, guard house …), not clickable
  *   name  : label on the map (Thai – translated on the site)
  *   level : take the outline from the roof at this height instead of the ground
@@ -47,7 +46,7 @@ const BUILDINGS = [
   { group: 'GROUP_3', code: 'H', kind: 'shop', name: 'อาคาร H' },
   { group: 'GROUP_9', code: 'M', kind: 'shop', name: 'อาคาร M' },
   { group: 'GROUP_10', code: 'N', kind: 'shop', name: 'อาคาร N' },
-  { group: 'GROUP_8', level: 6.9, code: null, kind: 'parking', name: 'อาคารจอดรถ' },
+  { group: 'GROUP_8', level: 6.9, code: 'P', kind: 'shop', name: 'อาคารจอดรถ' },
   { group: 'GROUP_11', code: null, kind: 'other', name: 'ศาลากลางน้ำ' },
   { group: 'GROUP_12', code: null, kind: 'other', name: 'ร้านริมน้ำ' },
   { group: 'GROUP_13', code: null, kind: 'other', name: 'อาคารริมถนน' },

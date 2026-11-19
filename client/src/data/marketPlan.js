@@ -215,8 +215,8 @@ export const PLAN = {
    ]
   },
   {
-   "code": null,
-   "kind": "parking",
+   "code": "P",
+   "kind": "shop",
    "name": "อาคารจอดรถ",
    "height": 6.9,
    "label": [16.7, 47.5],
