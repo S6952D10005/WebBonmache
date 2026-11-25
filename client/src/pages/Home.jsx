@@ -20,8 +20,8 @@ export default function Home({ settings }) {
 
   return (
     <>
-      {/* banner image + the white card on its edge holding the headline tabs */}
-      <PageHero settings={settings}>
+      {/* banner image, then the white card with the headline tabs right below it (not over the image) */}
+      <PageHero settings={settings} overlap={false}>
         <HeadlineTab tabs={data.headline.tabs} />
       </PageHero>
 

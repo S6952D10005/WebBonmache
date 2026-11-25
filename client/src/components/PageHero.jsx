@@ -9,8 +9,9 @@ import { useParallax } from './ScrollFx'
  * sits centred on the bottom edge of the image (half over it, half below).
  * If something inside the card has `data-hero-anchor`, that part is centred on
  * the edge instead, so whatever opens below it grows downwards only.
+ * overlap={false} → the card sits fully below the image instead (home page menu).
  */
-export default function PageHero({ settings, children }) {
+export default function PageHero({ settings, children, overlap = true }) {
   const parallax = useParallax(0.3, 1.1)
 
   // pull the card up so the image edge runs through its middle (or through the anchor's middle)
@@ -44,7 +45,7 @@ export default function PageHero({ settings, children }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-[120px] bg-gradient-to-b from-[#06302c]/45 via-[#06302c]/15 to-transparent lg:block" />
       </div>
 
-      <div className="container-bm relative z-20" style={{ marginTop: -half }}>
+      <div className={`container-bm relative z-20 ${overlap ? '' : 'pt-6 sm:pt-8'}`} style={{ marginTop: overlap ? -half : 0 }}>
         <div
           ref={card}
           className="mx-auto max-w-[1040px] rounded-[20px] border border-white/60 bg-white/90 px-4 py-3.5 shadow-[0_14px_32px_-18px_rgb(12_80_72/0.45)] backdrop-blur-md sm:px-6 sm:py-4"
