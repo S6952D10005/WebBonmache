@@ -10,8 +10,8 @@ import { useI18n } from '../i18n'
  * หน้าแรก (/home) – the page the menu's "หน้าแรก" and the logo open.
  * ("/" stays the start page that opens first.)
  *
- * Top to bottom: banner image with the Headline tab card (panel hidden until clicked) · Hero slider · Quick links ·
- * Happening · Food articles · Food brands · All events · News · Awards · Social · Map (getting here).
+ * Top to bottom: banner image with the Headline tab card (panel hidden until clicked) · Hero slider · Happening · Quick links ·
+ * Food articles · Food brands · All events · News · Awards · Social · Map (getting here).
  * Content: src/data/homeData.js
  */
 export default function Home({ settings }) {
@@ -27,10 +27,14 @@ export default function Home({ settings }) {
 
       <section className="container-bm pt-10">
         <HeroSlider slides={data.slides} />
-        <QuickLinks items={data.quickLinks} />
       </section>
 
       <Happening items={data.happening} />
+
+      {/* quick links (ค้นหาร้านค้า · กิจกรรม · การเดินทาง · เช่าพื้นที่) right under the highlights */}
+      <section className="container-bm pt-3">
+        <QuickLinks items={data.quickLinks} />
+      </section>
       <FoodArticles items={data.foodArticles} />
       <FoodBrands items={data.foodBrands} />
       <Events items={data.events} />

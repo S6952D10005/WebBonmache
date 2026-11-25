@@ -69,7 +69,7 @@ export const HOME = {
   },
 
   /* ---------- Hero slider ----------
-   * layout 'split'  = ข้อความซ้าย + รูปขวา
+   * layout 'split'  = ข้อความซ้าย + รูปขวา (ใช้แบบนี้ทุกสไลด์)
    * layout 'banner' = รูปเต็มกว้าง (แบนเนอร์โฆษณา / Option) – ใส่ title ได้หรือเว้นว่าง */
   slides: [
     {
@@ -84,7 +84,8 @@ export const HOME = {
     },
     {
       id: 2,
-      layout: 'banner',
+      layout: 'split',
+      eyebrow: 'Food Festival',
       title: 'Taste of Thailand',
       text: 'เทศกาลอาหารไทยทั่วไทย ทุกเสาร์–อาทิตย์ ตลอดเดือนนี้',
       cta: 'ดูกิจกรรม',

@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   ArrowRight,
   Award,
-  ChevronLeft,
-  ChevronRight,
   Clock3,
   Eye,
   Heart,
@@ -32,7 +30,7 @@ export function Awards({ items = [] }) {
   return (
     <section className="mt-16 bg-[#fbf7ee] py-14 lg:mt-20 lg:py-16">
       <div className="container-bm">
-        <HomeTitle eyebrow="Awards & recognition" title={t('รางวัลและมาตรฐานที่ได้รับ')} href="#" />
+        <HomeTitle eyebrow="Awards & recognition" title={t('รางวัลและมาตรฐานที่ได้รับ')} />
         <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
           {items.map((a) => {
             const Icon = AWARD_ICONS[a.icon] || Award
@@ -136,7 +134,7 @@ function PostCard({ post: p, page }) {
     <SmartLink
       href={p.url}
       style={{ '--pc': pf.color, '--ring': pf.ring }}
-      className="group relative flex w-[80%] shrink-0 snap-start flex-col rounded-[18px] p-[1.5px] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_-22px_var(--pc)] sm:w-[calc((100%-16px)/2)] lg:w-[calc((100%-48px)/4)]"
+      className="group relative flex flex-col rounded-[18px] p-[1.5px] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_-22px_var(--pc)]"
     >
       {/* border: grey → the app's colour / gradient */}
       <span aria-hidden="true" className="absolute inset-0 rounded-[18px] bg-[#e6eeec]" />
@@ -227,52 +225,12 @@ export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
   const { t } = useI18n()
   const [tab, setTab] = useState('all')
   const platforms = [...new Set(posts.map((p) => p.platform))]
-  const shown = tab === 'all' ? posts : posts.filter((p) => p.platform === tab)
-
-  // the row slides sideways (4 posts per view on desktop) – arrows next to the title
-  const row = useRef(null)
-  const [edge, setEdge] = useState({ start: true, end: false })
-  useEffect(() => {
-    const el = row.current
-    if (!el) return
-    el.scrollTo({ left: 0 })
-    const check = () => setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 })
-    check()
-    el.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check)
-    return () => {
-      el.removeEventListener('scroll', check)
-      window.removeEventListener('resize', check)
-    }
-  }, [tab, posts.length])
-  const slide = (dir) => {
-    const el = row.current
-    const card = el?.firstElementChild
-    if (card) el.scrollBy({ left: dir * (card.offsetWidth + 16), behavior: 'smooth' })
-  }
+  // 4 posts at most (the newest first in homeData), no paging
+  const shown = (tab === 'all' ? posts : posts.filter((p) => p.platform === tab)).slice(0, 4)
 
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="Follow us on social media" title={t('ติดตามเราบนโซเชียลมีเดีย')}>
-        <div className="mb-1 ml-auto hidden gap-1.5 sm:flex">
-          {[
-            [ChevronLeft, t('ก่อนหน้า'), -1, edge.start],
-            [ChevronRight, t('ถัดไป'), 1, edge.end],
-          ].map(([Icon, label, dir, off]) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => slide(dir)}
-              aria-label={label}
-              className={`grid size-9 place-items-center rounded-full border border-[#d9e4e1] text-brand-800 transition ${
-                off ? 'opacity-35' : 'hover:border-brand-600 hover:bg-brand-600 hover:text-white'
-              }`}
-            >
-              <Icon className="size-4" strokeWidth={2.4} />
-            </button>
-          ))}
-        </div>
-      </HomeTitle>
+      <HomeTitle eyebrow="Follow us on social media" title={t('ติดตามเราบนโซเชียลมีเดีย')} />
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" className="flex flex-wrap gap-1.5">
@@ -323,8 +281,8 @@ export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
         </div>
       </div>
 
-      {/* post cards: 4 per view on desktop, 2 on tablet, 1 + a peek on phones; arrows / swipe for more */}
-      <div ref={row} className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-4 pt-1 [scrollbar-width:none]">
+      {/* post cards: 4 in a row on desktop, 2 on tablet, 1 on phones */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {shown.map((p) => (
           <PostCard key={p.id} post={p} page={page} />
         ))}

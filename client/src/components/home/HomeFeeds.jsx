@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, Clock3, MapPin } from 'lucide-react'
 import SmartLink from '../SmartLink'
 import { SmartImage } from '../Decor'
 import { useI18n } from '../../i18n'
@@ -38,61 +37,21 @@ const DateLine = ({ children }) => (
   </span>
 )
 
+/* home card sections show 4 cards at most (no "ดูทั้งหมด", no paging) */
+export const CARDS_MAX = 4
+
 /* ======================================================================== */
-/*  Happening – row of tall cards, slides sideways with the arrow buttons   */
+/*  Happening – 4 tall poster cards (2 per row on tablet / phone)           */
 /* ======================================================================== */
 export function Happening({ items = [] }) {
   const { t } = useI18n()
-  const row = useRef(null)
-  const [edge, setEdge] = useState({ start: true, end: false })
-
-  useEffect(() => {
-    const el = row.current
-    if (!el) return
-    const check = () => setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 })
-    check()
-    el.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check)
-    return () => {
-      el.removeEventListener('scroll', check)
-      window.removeEventListener('resize', check)
-    }
-  }, [items.length])
-
-  const slide = (dir) => {
-    const el = row.current
-    const card = el?.firstElementChild
-    if (!card) return
-    el.scrollBy({ left: dir * (card.offsetWidth + 20), behavior: 'smooth' })
-  }
-
   return (
     <section id="happening" className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="Happening" title={t('ไฮไลต์ที่ไม่ควรพลาด')} href="#events">
-        <div className="mb-1 hidden gap-1.5 sm:flex">
-          {[
-            [ChevronLeft, t('ก่อนหน้า'), -1, edge.start],
-            [ChevronRight, t('ถัดไป'), 1, edge.end],
-          ].map(([Icon, label, dir, off]) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => slide(dir)}
-              aria-label={label}
-              className={`grid size-9 place-items-center rounded-full border border-[#d9e4e1] text-brand-800 transition ${
-                off ? 'opacity-35' : 'hover:border-brand-600 hover:bg-brand-600 hover:text-white'
-              }`}
-            >
-              <Icon className="size-4" strokeWidth={2.4} />
-            </button>
-          ))}
-        </div>
-      </HomeTitle>
+      <HomeTitle eyebrow="Happening" title={t('ไฮไลต์ที่ไม่ควรพลาด')} />
 
-      {/* exactly 4 cards side by side on desktop (2 on tablet) – no half card at the edge; the arrows page through the rest */}
-      <div ref={row} className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none]">
-        {items.map((h) => (
-          <SmartLink key={h.id} href={h.url} className="group w-[72%] shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        {items.slice(0, CARDS_MAX).map((h) => (
+          <SmartLink key={h.id} href={h.url} className="group">
             {/* poster-style card: dark glass tag, light sweep + pink→orange glow on hover */}
             <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[#1b1416] ring-1 ring-black/5 transition duration-500 group-hover:shadow-[0_22px_40px_-22px_rgb(236_28_140/0.75)]">
               <SmartImage src={h.image} alt={h.title} className="h-full w-full transition duration-700 group-hover:scale-105" />
@@ -126,9 +85,9 @@ export function FoodArticles({ items = [] }) {
   const { t } = useI18n()
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="Food stories" title={t('เรื่องอร่อยในบองมาร์เช่')} href="#" />
+      <HomeTitle eyebrow="Food stories" title={t('เรื่องอร่อยในบองมาร์เช่')} />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((a) => (
+        {items.slice(0, CARDS_MAX).map((a) => (
           <SmartLink key={a.id} href={a.url} className="group overflow-hidden rounded-[18px] border border-[#e6eeec] bg-white transition hover:-translate-y-1 hover:shadow-card">
             <div className="aspect-[16/10] overflow-hidden">
               <SmartImage src={a.image} alt={a.title} className="h-full w-full transition duration-700 group-hover:scale-105" />
@@ -155,14 +114,19 @@ export function FoodArticles({ items = [] }) {
 /* ======================================================================== */
 export function FoodBrands({ items = [] }) {
   const { t } = useI18n()
-  const loop = [...items, ...items] // two copies → the strip loops without a gap
+  // one half = the brands repeated until it is wider than any screen (~2600px at ~192px a card),
+  // then two identical halves → the strip runs on forever with no empty gap
+  const reps = Math.max(1, Math.ceil(2600 / (Math.max(items.length, 1) * 192)))
+  const half = Array.from({ length: reps }, () => items).flat()
+  const loop = [...half, ...half]
+  const seconds = Math.max(20, half.length * 5.4) // same speed however many copies
   return (
     <section className="pt-16 lg:pt-20">
       <div className="container-bm">
-        <HomeTitle eyebrow="Famous food brands" title={t('ร้านดังในบองมาร์เช่')} href="/shops?cat=1" />
+        <HomeTitle eyebrow="Famous food brands" title={t('ร้านดังในบองมาร์เช่')} />
       </div>
       <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)]">
-        <div className="flex w-max gap-4 py-1 motion-safe:animate-[marquee_38s_linear_infinite] group-hover:[animation-play-state:paused]">
+        <div className="flex w-max gap-4 py-1 motion-safe:animate-[marquee_38s_linear_infinite] group-hover:[animation-play-state:paused]" style={{ animationDuration: `${seconds}s` }}>
           {loop.map((b, i) => (
             <SmartLink
               key={`${b.id}-${i}`}
@@ -192,10 +156,10 @@ export function Events({ items = [] }) {
   const { t } = useI18n()
   return (
     <section id="events" className="container-bm scroll-mt-24 pt-16 lg:pt-20">
-      <HomeTitle eyebrow="All events" title={t('กิจกรรมทั้งหมด')} href="#" />
+      <HomeTitle eyebrow="All events" title={t('กิจกรรมทั้งหมด')} />
       {/* same card size as Happening: a quarter of the content width on desktop */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((e) => (
+        {items.slice(0, CARDS_MAX).map((e) => (
           <SmartLink key={e.id} href={e.url} className="group">
             {/* 4:5 poster card – same look + hover as Happening: dark glass label, light sweep, pink glow */}
             <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[#1b1416] ring-1 ring-black/5 transition duration-500 group-hover:shadow-[0_22px_40px_-22px_rgb(236_28_140/0.75)]">
@@ -233,7 +197,7 @@ export function News({ items = [] }) {
   if (!first) return null
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="News" title={t('ข่าวสารบองมาร์เช่')} href="#" />
+      <HomeTitle eyebrow="News" title={t('ข่าวสารบองมาร์เช่')} />
       <div className="grid gap-5 lg:grid-cols-[7fr_5fr]">
         <SmartLink href={first.url} className="group relative block overflow-hidden rounded-[20px] bg-brand-900">
           <div className="aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[340px]">

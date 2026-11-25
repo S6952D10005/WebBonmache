@@ -250,18 +250,25 @@ export function HeroSlider({ slides = [] }) {
       </div>
 
       {count > 1 && (
-        // prev · dots · next – under the text on desktop, centred on phones
-        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 sm:bottom-6 lg:bottom-8 lg:left-12 lg:translate-x-0">
-          <button
-            type="button"
-            onClick={() => go(index - 1)}
-            aria-label={t('ก่อนหน้า')}
-            className="hidden size-8 place-items-center rounded-full border border-brand-800/15 bg-white/90 text-brand-800 transition hover:border-brand-600 hover:bg-brand-600 hover:text-white sm:grid"
-          >
-            <ChevronLeft className="size-4" strokeWidth={2.4} />
-          </button>
-          {/* dots sit on a small white pill so they show on light and dark slides */}
-          <div className="flex gap-1.5 rounded-full bg-white/85 px-2 py-1.5 shadow-sm backdrop-blur">
+        // controls sit on the picture: small ‹ › at its left / right edges, dots at its bottom.
+        // This layer covers exactly the picture area (top on phones, right 7/12 on desktop).
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 aspect-[16/9] lg:inset-y-0 lg:left-[41.667%] lg:aspect-auto">
+          {[
+            [ChevronLeft, t('ก่อนหน้า'), -1, 'left-3'],
+            [ChevronRight, t('ถัดไป'), 1, 'right-3'],
+          ].map(([Icon, label, dir, side]) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => go(index + dir)}
+              aria-label={label}
+              className={`pointer-events-auto absolute top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-white ring-1 ring-white/70 backdrop-blur-sm transition hover:scale-110 hover:bg-black/45 sm:size-8 ${side}`}
+            >
+              <Icon className="size-4" strokeWidth={2.6} />
+            </button>
+          ))}
+          {/* dots on a see-through pill, bottom-centre of the picture */}
+          <div className="pointer-events-auto absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/30 px-2 py-1.5 ring-1 ring-white/60 backdrop-blur-sm">
             {slides.map((s, i) => (
               <button
                 key={s.id}
@@ -269,18 +276,10 @@ export function HeroSlider({ slides = [] }) {
                 onClick={() => go(i)}
                 aria-label={t('สไลด์ {n}', { n: i + 1 })}
                 aria-current={i === index}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? 'w-7 bg-brand-600' : 'w-1.5 bg-brand-800/30 hover:bg-brand-800/55'}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'}`}
               />
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => go(index + 1)}
-            aria-label={t('ถัดไป')}
-            className="hidden size-8 place-items-center rounded-full border border-brand-800/15 bg-white/90 text-brand-800 transition hover:border-brand-600 hover:bg-brand-600 hover:text-white sm:grid"
-          >
-            <ChevronRight className="size-4" strokeWidth={2.4} />
-          </button>
         </div>
       )}
     </div>
@@ -296,8 +295,7 @@ const textFx = (active) => (active ? 'translate-y-0 opacity-100 delay-300' : 'tr
 function SplitSlide({ slide: s, active }) {
   return (
     <div className="grid h-full bg-[#f4f6f3] lg:min-h-[420px] lg:grid-cols-[5fr_7fr]">
-      {/* bottom padding leaves room for the slide controls */}
-      <div className={`order-2 flex flex-col justify-center px-6 pb-12 pt-6 transition duration-500 sm:px-10 sm:pb-20 lg:order-1 lg:pb-24 lg:pl-12 lg:pt-12 ${textFx(active)}`}>
+      <div className={`order-2 flex flex-col justify-center px-6 pb-8 pt-6 transition duration-500 sm:px-10 sm:pb-10 lg:order-1 lg:py-12 lg:pl-12 ${textFx(active)}`}>
         {s.eyebrow && <p className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-[#f37021]">{s.eyebrow}</p>}
         <h2
           className={`mt-2 text-[24px] font-extrabold leading-[1.2] text-brand-800 transition-all delay-150 duration-700 sm:text-[30px] ${
@@ -321,7 +319,7 @@ function SplitSlide({ slide: s, active }) {
         <SmartImage
           src={s.image}
           alt={s.title}
-          className={`absolute inset-0 h-full w-full transition-transform duration-[6000ms] ease-out ${active ? 'scale-105' : 'scale-100'}`}
+          className="absolute inset-0 h-full w-full"
         />
       </div>
     </div>
@@ -334,7 +332,7 @@ function BannerSlide({ slide: s, active }) {
       <SmartImage
         src={s.image}
         alt={s.title || ''}
-        className={`absolute inset-0 h-full w-full transition-transform duration-[6000ms] ease-out ${active ? 'scale-105' : 'scale-100'}`}
+        className="absolute inset-0 h-full w-full"
       />
       {s.title && (
         <>
