@@ -42,7 +42,7 @@ INSERT INTO footer_links (group_key, label, url, sort_order) VALUES
 
 -- 2) + 3) site_settings (เพิ่มใหม่ หรือแทนค่าเดิม) -------------------------
 INSERT INTO site_settings (setting_key, setting_value, description) VALUES
-('address_title',      'บอง มาร์เช่ มาร์เก็ตพาร์ค',                                   'ชื่อสถานที่ใน Footer'),
+('address_title',      'บองมาร์เช่ มาร์เก็ตพาร์ค',                                   'ชื่อสถานที่ใน Footer'),
 ('address',            '105/1 ถ.เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900', 'ที่อยู่'),
 ('opening_hours',      'ทุกวัน 05.00 – 22.00 น.',                                    'เวลาทำการ (Footer)'),
 ('phone',              '02-953-8980',                                               'เบอร์โทร'),

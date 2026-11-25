@@ -126,7 +126,7 @@ export function FoodArticles({ items = [] }) {
   const { t } = useI18n()
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="Food stories" title={t('เรื่องอร่อยในบอนมาร์เช่')} href="#" />
+      <HomeTitle eyebrow="Food stories" title={t('เรื่องอร่อยในบองมาร์เช่')} href="#" />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((a) => (
           <SmartLink key={a.id} href={a.url} className="group overflow-hidden rounded-[18px] border border-[#e6eeec] bg-white transition hover:-translate-y-1 hover:shadow-card">
@@ -159,7 +159,7 @@ export function FoodBrands({ items = [] }) {
   return (
     <section className="pt-16 lg:pt-20">
       <div className="container-bm">
-        <HomeTitle eyebrow="Famous food brands" title={t('ร้านดังในบอนมาร์เช่')} href="/shops?cat=1" />
+        <HomeTitle eyebrow="Famous food brands" title={t('ร้านดังในบองมาร์เช่')} href="/shops?cat=1" />
       </div>
       <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)]">
         <div className="flex w-max gap-4 py-1 motion-safe:animate-[marquee_38s_linear_infinite] group-hover:[animation-play-state:paused]">
@@ -233,7 +233,7 @@ export function News({ items = [] }) {
   if (!first) return null
   return (
     <section className="container-bm pt-16 lg:pt-20">
-      <HomeTitle eyebrow="News" title={t('ข่าวสารบอนมาร์เช่')} href="#" />
+      <HomeTitle eyebrow="News" title={t('ข่าวสารบองมาร์เช่')} href="#" />
       <div className="grid gap-5 lg:grid-cols-[7fr_5fr]">
         <SmartLink href={first.url} className="group relative block overflow-hidden rounded-[20px] bg-brand-900">
           <div className="aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[340px]">

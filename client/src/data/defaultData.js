@@ -10,7 +10,7 @@ export const defaultData = {
     hero_title_2: 'เริ่มได้ที่นี่',
     hero_subtitle: 'อาหารดี ของใช้ปลอดภัย\nเพื่อสุขภาพที่ยั่งยืน',
     hero_badge: 'Open now',
-    hero_video_label: 'ชมวิดีโอแนะนำบอนมาร์เช่',
+    hero_video_label: 'ชมวิดีโอแนะนำบองมาร์เช่',
     hero_video_duration: '(1:00)',
     hero_video_url: '',
     hero_image: '/images/hero-banner.webp',
@@ -23,7 +23,7 @@ export const defaultData = {
     leasing_text: 'พร้อมเปิดโอกาสให้ธุรกิจของคุณเติบโต\nไปกับสังคมที่ยั่งยืน และชุมชนของเรา',
     leasing_button: 'สอบถามข้อมูลเพิ่มเติม',
     // ---- footer / contact (source: bonmarche.co.th/contact) ----
-    address_title: 'บอง มาร์เช่ มาร์เก็ตพาร์ค',
+    address_title: 'บองมาร์เช่ มาร์เก็ตพาร์ค',
     address: '105/1 ถ.เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
     opening_hours: 'ทุกวัน 05.00 – 22.00 น.',
     phone: '02-953-8980',

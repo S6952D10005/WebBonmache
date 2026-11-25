@@ -9,7 +9,7 @@
 -- =====================================================================
 
 INSERT INTO site_settings (setting_key, setting_value, description) VALUES
-('address_title', 'บอง มาร์เช่ มาร์เก็ตพาร์ค',                                   'ชื่อสถานที่ใน Footer'),
+('address_title', 'บองมาร์เช่ มาร์เก็ตพาร์ค',                                   'ชื่อสถานที่ใน Footer'),
 ('address',       '105/1 ถ.เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900', 'ที่อยู่')
 AS new_row
 ON DUPLICATE KEY UPDATE setting_value = new_row.setting_value, description = new_row.description;

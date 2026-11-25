@@ -150,8 +150,8 @@ export const HOME = {
 
   /* ---------- News ---------- */
   news: [
-    { id: 1, title: 'บอน มาร์เช่ รับรางวัลตลาดสดน่าซื้อ ระดับดีเด่น', date: '10 พ.ย. 2569', image: '/images/visit-banner.webp', url: '#' },
-    { id: 2, title: 'รถไฟฟ้าสายสีแดง เดินทางสะดวก ถึงบอน มาร์เช่', date: '3 พ.ย. 2569', image: '/images/hero-banner.webp', url: '#' },
+    { id: 1, title: 'บองมาร์เช่ รับรางวัลตลาดสดน่าซื้อ ระดับดีเด่น', date: '10 พ.ย. 2569', image: '/images/visit-banner.webp', url: '#' },
+    { id: 2, title: 'รถไฟฟ้าสายสีแดง เดินทางสะดวก ถึงบองมาร์เช่', date: '3 พ.ย. 2569', image: '/images/hero-banner.webp', url: '#' },
     { id: 3, title: 'มาตรการความสะอาดและความปลอดภัยภายในตลาด', date: '28 ต.ค. 2569', image: '/images/leasing-banner.webp', url: '#' },
   ],
 

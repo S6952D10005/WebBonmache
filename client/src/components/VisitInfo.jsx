@@ -78,7 +78,7 @@ export default function VisitInfo({ items, image, mapUrl }) {
 
           {/* photo + travel card */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-[0_2px_10px_-4px_rgb(12_80_72/0.2)]">
-            <ImageCrop src={image} alt={t('บอนมาร์เช่')} x={1269} y={0} w={1170} h={378} imgW={2537} imgH={684} />
+            <ImageCrop src={image} alt={t('บองมาร์เช่')} x={1269} y={0} w={1170} h={378} imgW={2537} imgH={684} />
             <div className="relative -mt-6 px-3 pb-3">
               <div className="relative px-4 py-4 text-white">
                 <Brush variant="banner" color="#13857a" rough={9} className="absolute inset-0 h-full w-full" />

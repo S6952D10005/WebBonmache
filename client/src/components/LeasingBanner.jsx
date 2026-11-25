@@ -84,7 +84,7 @@ export default function LeasingBanner({ settings }) {
 
         <ImageCrop
           src={settings.leasing_image}
-          alt={t('พื้นที่ให้เช่า บอนมาร์เช่')}
+          alt={t('พื้นที่ให้เช่า บองมาร์เช่')}
           x={1378}
           y={82}
           w={818}
