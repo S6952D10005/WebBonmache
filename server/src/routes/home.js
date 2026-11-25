@@ -88,19 +88,21 @@ for (const key of ['highlights', 'categories', 'shops', 'visitInfo', 'footerLink
 }
 
 // Shop Directory: every active shop + zones + categories.
-// Before update-2026-11-16-shops.sql is run the new columns don't exist yet:
+// Before update-2026-11-25-real-shops.sql is run the new columns (logo_url, gallery, facebook, instagram) don't exist yet:
 // return empty lists so the front end uses its built-in directory.
 router.get('/directory', async (_req, res, next) => {
   try {
-    const [shops, zones, categories] = await Promise.all([
+    const [rows, zones, categories] = await Promise.all([
       query(
-        `SELECT id, category_id, name, category_label, badge, is_new, is_featured, image_url, link,
-                zone, unit_no, open_hours, phone, description
+        `SELECT id, category_id, name, category_label, badge, is_new, is_featured, image_url, logo_url, gallery, link,
+                zone, unit_no, open_hours, phone, facebook, instagram, description
            FROM shops WHERE is_active = 1 ORDER BY sort_order, id`,
       ),
       query('SELECT code, name FROM shop_zones ORDER BY sort_order, code'),
       query(SQL.categories),
     ])
+    // gallery is stored as comma-separated image paths
+    const shops = rows.map((s) => ({ ...s, gallery: s.gallery ? s.gallery.split(',').filter(Boolean) : [] }))
     res.json({ shops, zones, categories })
   } catch (err) {
     if (err.code === 'ER_BAD_FIELD_ERROR' || err.code === 'ER_NO_SUCH_TABLE') return res.json({ shops: [], zones: [], categories: [] })

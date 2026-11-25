@@ -1,4 +1,5 @@
 import {
+  BriefcaseBusiness,
   Coffee,
   Gift,
   HeartPulse,
@@ -22,6 +23,7 @@ export const CATEGORY_ICONS = {
   gift: Gift,
   sparkles: Sparkle,
   map: MapPinned,
+  service: BriefcaseBusiness,
 }
 
 const COLOR = {
@@ -38,7 +40,8 @@ export default function Categories({ items }) {
       <div className="panel-bm px-4 pb-5 pt-3 sm:px-5">
         <SectionHeader icon={LayoutGrid} iconColor="teal" title={t('ค้นหาตามหมวดหมู่')} subtitle={t('เลือกช้อปได้ตามที่คุณต้องการ')} href="/shops" className="mb-2 pr-2" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-[1.18fr_1.18fr_1.15fr_1fr_1fr_1fr_1fr_1fr] lg:gap-[12px]">
-          {items.map((c) => {
+          {/* the grid has 8 fixed columns; บริการ & การศึกษา is only used on the Shop Directory */}
+          {items.filter((c) => c.icon !== 'service').map((c) => {
             const Icon = CATEGORY_ICONS[c.icon] || LayoutGrid
             return (
               <SmartLink

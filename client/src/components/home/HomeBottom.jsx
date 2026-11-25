@@ -111,6 +111,12 @@ function BrandIcon({ platform, className = 'size-4' }) {
           <path d="M16.6 3c.3 2 1.6 3.4 3.6 3.6v3c-1.3 0-2.6-.4-3.6-1.1v6.2a5.3 5.3 0 1 1-5.3-5.3c.3 0 .6 0 .9.1v3.1a2.3 2.3 0 1 0 1.4 2.1V3h3z" />
         </svg>
       )
+    case 'line':
+      return (
+        <svg {...common} fill="currentColor">
+          <path d="M12 3.5c-5 0-9 3.2-9 7.2 0 3.6 3.2 6.6 7.5 7.1.3.1.7.2.8.5.1.2.1.6 0 .8l-.1.8c0 .2-.2.9.8.5s5.4-3.2 7.4-5.4c1.4-1.5 2.1-3 2.1-4.3 0-4-4-7.2-9-7.2zM8.3 13.1H6.5c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v3.1h1.3c.3 0 .5.2.5.5s-.2.5-.5.5zm1.8-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v3.6zm4.3 0c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-1.8-2.5v2.2c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l1.8 2.5V9c0-.3.2-.5.5-.5s.5.2.5.5v3.6zm2.9-2.3c.3 0 .5.2.5.5s-.2.5-.5.5h-1.3v.8h1.3c.3 0 .5.2.5.5s-.2.5-.5.5h-1.8c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5h1.8c.3 0 .5.2.5.5s-.2.5-.5.5h-1.3v.8h1.3z" />
+        </svg>
+      )
     default:
       return null
   }
@@ -293,14 +299,22 @@ export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {
 
 /* ======================================================================== */
 /*  Map – Google map on the left, "Getting here" panel on the right         */
-/*  (address / phone / opening hours come from the site settings)           */
+/*  (place / address / hours / phone / socials as on bonmarche.co.th/contact */
+/*   – from homeData.gettingHere; an empty one falls back to the settings)  */
 /* ======================================================================== */
+const SOCIAL_COLOR = { facebook: '#1877f2', instagram: '#d62976', line: '#06c755' }
+
 export function GettingHere({ settings = {}, info = {} }) {
   const { t } = useI18n()
-  // the map pin is found by name (mapQuery); "นำทาง" opens the market's own Google Maps link when there is one
-  const place = info.mapQuery || settings.site_name
-  const embed = `https://www.google.com/maps?q=${encodeURIComponent(place)}&z=16&output=embed`
-  const directions = settings.map_url || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place)}`
+  const address = info.address || settings.address
+  const hours = info.hours || settings.opening_hours
+  const phone = info.phone || settings.phone
+  // the map pin is found by name (mapQuery), the same way as the map on the contact page;
+  // "นำทาง" opens the market's own Google Maps link when there is one
+  const pin = info.mapQuery || settings.site_name
+  const embed = `https://maps.google.com/maps?q=${encodeURIComponent(pin)}&t=m&z=17&output=embed&iwloc=near`
+  const directions = info.mapUrl || settings.map_url || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(pin)}`
+  const socials = (info.socials || []).filter((s) => s.url)
 
   return (
     <section id="getting-here" className="container-bm scroll-mt-24 pb-16 pt-16 lg:pb-20 lg:pt-20">
@@ -322,32 +336,53 @@ export function GettingHere({ settings = {}, info = {} }) {
           {info.text && <p className="mt-3 max-w-[300px] text-[13.5px] leading-relaxed text-white/75">{info.text}</p>}
 
           <ul className="mt-6 w-full max-w-[300px] space-y-3 text-[13px] text-white/85">
-            {settings.address && (
+            {address && (
               <li className="flex items-start justify-center gap-2">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-[#f9a46b]" strokeWidth={2.2} />
-                <span>{settings.address}</span>
+                <span>
+                  {info.place && <b className="block font-bold text-white">{info.place}</b>}
+                  {address}
+                </span>
               </li>
             )}
-            {settings.phone && (
+            {hours && (
+              <li className="flex items-start justify-center gap-2">
+                <Clock3 className="mt-0.5 size-4 shrink-0 text-[#f9a46b]" strokeWidth={2.2} />
+                <span>
+                  <b className="font-bold text-white">{t('เวลาทำการ')}</b> {hours}
+                </span>
+              </li>
+            )}
+            {phone && (
               <li className="flex items-center justify-center gap-2">
                 <Phone className="size-4 shrink-0 text-[#f9a46b]" strokeWidth={2.2} />
                 <span>
                   <b className="font-bold text-white">{t('โทร')}</b>{' '}
-                  <a href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-white hover:underline">
-                    {settings.phone}
+                  <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="hover:text-white hover:underline">
+                    {phone}
                   </a>
                 </span>
               </li>
             )}
-            {settings.opening_hours && (
-              <li className="flex items-center justify-center gap-2">
-                <Clock3 className="size-4 shrink-0 text-[#f9a46b]" strokeWidth={2.2} />
-                <span>
-                  <b className="font-bold text-white">{t('เวลาเปิด')}</b> {settings.opening_hours}
-                </span>
-              </li>
-            )}
           </ul>
+
+          {/* Facebook · Instagram · LINE, as on the contact page */}
+          {socials.length > 0 && (
+            <div className="mt-5 flex items-center justify-center gap-2.5">
+              {socials.map((s) => (
+                <SmartLink
+                  key={s.platform}
+                  href={s.url}
+                  aria-label={s.label}
+                  title={s.label}
+                  className="grid size-9 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-[var(--sc)] hover:ring-[var(--sc)]"
+                  style={{ '--sc': SOCIAL_COLOR[s.platform] || '#f37021' }}
+                >
+                  <BrandIcon platform={s.platform} className="size-[17px]" />
+                </SmartLink>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 grid w-full max-w-[300px] gap-3">
             <SmartLink

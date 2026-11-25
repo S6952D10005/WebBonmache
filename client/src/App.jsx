@@ -11,6 +11,7 @@ import Footer from './components/Footer'
 import SmartLink from './components/SmartLink'
 import ShopDirectory from './pages/ShopDirectory'
 import Home from './pages/Home'
+import News from './pages/News'
 import { BackToTop, ScrollProgress, useScrollReveal } from './components/ScrollFx'
 import { defaultData } from './data/defaultData'
 import { useI18n } from './i18n'
@@ -136,6 +137,7 @@ export default function App() {
             <Route path="/" element={<HomePage data={view} />} />
             <Route path={HOME_URL} element={<Home settings={settings} />} />
             <Route path="/shops" element={<ShopDirectory settings={settings} categories={categories} />} />
+            <Route path="/news" element={<News settings={settings} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

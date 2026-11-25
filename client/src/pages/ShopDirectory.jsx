@@ -5,16 +5,15 @@ import { CATEGORY_ICONS } from '../components/Categories'
 import { LeafBranch } from '../components/Decor'
 import SmartLink from '../components/SmartLink'
 import PageHero from '../components/PageHero'
-import ColorfulText from '../components/ColorfulText'
 import MarketMap, { ZONE_COLORS } from '../components/MarketMap'
-import { buildings as rawBuildings, directoryShops, zones as defaultZones } from '../data/directoryData'
+import { directoryShops, zones as defaultZones } from '../data/directoryData'
+import { defaultData } from '../data/defaultData'
 import { useI18n } from '../i18n'
 
 /*
  * Shop Directory
  *   hero image + title / search card
  *   → market map (3D plan from the CAD drawing – tap a building to filter)
- *   → building tabs (All / Fresh Market / Bon Marché Plaza)
  *   → category icons (each category has its own colour)
  *   → shop cards → detail dialog
  */
@@ -56,21 +55,6 @@ const formatHours = (hours = '', t) => t('{h} น.', { h: hours.replace(/\s*-\s*
 /* ------------------------------------------------------------------------ */
 /*  small pieces                                                            */
 /* ------------------------------------------------------------------------ */
-
-function OpenBadge({ open, className = '' }) {
-  const { t } = useI18n()
-  if (open === null) return null
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-[5px] text-[11.5px] font-semibold leading-none ${
-        open ? 'bg-white text-[#13804f]' : 'bg-white/90 text-[#7a8785]'
-      } shadow-sm ${className}`}
-    >
-      <span className={`size-1.5 rounded-full ${open ? 'animate-pulse bg-[#1fb36b]' : 'bg-[#b5bfbd]'}`} />
-      {open ? t('เปิดอยู่') : t('ปิดแล้ว')}
-    </span>
-  )
-}
 
 /** shop photo, or a tinted tile with the category icon when there's no photo yet */
 function ShopImage({ shop, category, className = '' }) {
@@ -120,39 +104,47 @@ function CategoryIcon({ active, onClick, icon: Icon = Store, color, children }) 
   )
 }
 
-/** building name, small and coloured (bottom-right of each card, like a mall logo) */
-const BuildingMark = ({ building }) =>
-  building ? <ColorfulText text={building.name} className="text-[10.5px] font-black leading-none tracking-[-0.01em]" /> : null
 
 /* ------------------------------------------------------------------------ */
 /*  shop card + detail dialog                                               */
 /* ------------------------------------------------------------------------ */
 
-function ShopCard({ shop, category, building, open, onOpen }) {
-  const { t } = useI18n()
+function ShopCard({ shop, category, onOpen }) {
+  const Icon = CATEGORY_ICONS[category?.icon] || Store
   return (
     <button
       type="button"
       onClick={onOpen}
       className="group flex h-full w-full flex-col rounded-2xl border border-[#eceff0] bg-white p-3 text-left shadow-[0_2px_10px_-6px_rgb(16_40_38/0.25)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_30px_-16px_rgb(16_40_38/0.4)] focus-visible:outline-2 focus-visible:outline-[#ec1c8c]"
     >
-      <div className="relative aspect-[1/0.92] overflow-hidden rounded-lg bg-[#f6f7f7]">
+      <div className="relative aspect-[1/0.86] overflow-hidden rounded-lg bg-[#f6f7f7]">
         <ShopImage shop={shop} category={category} className="h-full w-full transition duration-500 group-hover:scale-105" />
-        {open !== null && (
-          <span
-            className={`absolute left-2 top-2 size-2.5 rounded-full ring-2 ring-white ${open ? 'bg-[#1fb36b]' : 'bg-[#b5bfbd]'}`}
-            title={open ? t('เปิดอยู่') : t('ปิดแล้ว')}
-          />
-        )}
       </div>
-      <h3 className="mt-3 line-clamp-2 min-h-[2.5em] text-[13px] font-medium leading-[1.25] text-ink">{shop.name}</h3>
-      <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-        {shop.unit_no && (
-          <span className="rounded-md bg-[#fde5f1] px-1.5 py-[3px] text-[10.5px] font-semibold leading-none text-[#ec1c8c]">
-            {shop.unit_no}
+
+      {/* logo (or the category icon) beside the shop name */}
+      <div className="mt-3 flex items-center gap-2.5">
+        {shop.logo_url ? (
+          <img src={shop.logo_url} alt="" loading="lazy" className="size-8 shrink-0 rounded-full bg-white object-contain p-0.5 ring-1 ring-[#e6eeec]" />
+        ) : (
+          <span className={`grid size-8 shrink-0 place-items-center rounded-full ${TINT[category?.color] || TINT.teal}`}>
+            <Icon className="size-4" strokeWidth={1.8} />
           </span>
         )}
-        <BuildingMark building={building} />
+        <h3 className="line-clamp-2 min-w-0 text-[13.5px] font-semibold leading-[1.25] text-ink">{shop.name}</h3>
+      </div>
+
+      {shop.description && <p className="mt-2 line-clamp-2 text-[11.5px] leading-[1.45] text-[#6b7a77]">{shop.description}</p>}
+
+      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-3">
+        {shop.unit_no && (
+          <span className="rounded-md bg-[#fde5f1] px-1.5 py-[3px] text-[10.5px] font-semibold leading-none text-[#ec1c8c]">{shop.unit_no}</span>
+        )}
+        {shop.open_hours && (
+          <span className="flex items-center gap-1 text-[11px] leading-none text-[#5d6c69]">
+            <Clock className="size-3.5 text-brand-600" strokeWidth={2} />
+            {shop.open_hours.replace(/\s*-\s*/, '–')}
+          </span>
+        )}
       </div>
     </button>
   )
@@ -160,6 +152,8 @@ function ShopCard({ shop, category, building, open, onOpen }) {
 
 function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
   const { t } = useI18n()
+  const photos = shop.gallery?.length ? shop.gallery : []
+  const [photo, setPhoto] = useState(Math.max(0, photos.indexOf(shop.image_url)))
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -185,30 +179,57 @@ function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
         aria-modal="true"
         aria-label={shop.name}
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:max-w-[540px] sm:rounded-3xl"
+        // phone: photo on top, details below · tablet/desktop: photo left, details right
+        className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:max-w-[760px] sm:rounded-3xl md:grid md:max-w-[1180px] md:grid-cols-[1.2fr_1fr] md:overflow-hidden"
       >
-        <div className="relative aspect-[16/9]">
-          <ShopImage shop={shop} category={category} className="h-full w-full" />
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('ปิด')}
-            className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/95 text-ink shadow-md transition hover:bg-white hover:text-brand-700"
-          >
-            <X className="size-5" />
-          </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t('ปิด')}
+          className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full bg-white/95 text-ink shadow-md transition hover:bg-white hover:text-brand-700"
+        >
+          <X className="size-5" />
+        </button>
+
+        {/* photo + thumbnails */}
+        <div className="md:flex md:min-h-0 md:flex-col md:bg-[#f6f7f7]">
+        <div className="relative aspect-[16/9] md:aspect-auto md:min-h-[min(640px,82dvh)] md:flex-1">
+          <ShopImage shop={photos.length ? { ...shop, image_url: photos[photo] } : shop} category={category} className="h-full w-full md:absolute md:inset-0" />
           <div className="absolute bottom-3 left-3 flex gap-2">
             {shop.badge && <span className="pill-tag">{shop.badge}</span>}
-            <OpenBadge open={open} />
           </div>
         </div>
 
-        <div className="px-6 pb-6 pt-5">
-          <p className="text-[12.5px] font-medium text-brand-600">{cleanName(category?.name) || shop.category_label}</p>
-          <h2 className="mt-0.5 font-head text-[24px] font-extrabold leading-tight text-ink">{shop.name}</h2>
-          {shop.description && <p className="mt-2 text-[14px] leading-relaxed text-[#4d5f5c]">{shop.description}</p>}
+        {photos.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto px-6 pt-3 md:px-4 md:pb-4">
+            {photos.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setPhoto(i)}
+                aria-label={t('รูปที่ {n}', { n: i + 1 })}
+                aria-pressed={photo === i}
+                className={`size-16 shrink-0 overflow-hidden rounded-lg ring-2 transition ${photo === i ? 'ring-brand-500' : 'ring-transparent opacity-70 hover:opacity-100'}`}
+              >
+                <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+        </div>
 
-          <dl className="mt-5 divide-y divide-[#edf2f1] rounded-2xl border border-[#e6eeec] text-[13.5px]">
+        {/* details */}
+        <div className="px-6 pb-6 pt-5 md:flex md:flex-col md:overflow-y-auto md:px-10 md:pb-10 md:pt-12">
+          <div className="flex items-center gap-3">
+            {shop.logo_url && <img src={shop.logo_url} alt="" className="size-14 shrink-0 rounded-full bg-white object-contain p-1 ring-1 ring-[#e6eeec] md:size-[72px]" />}
+            <div className="min-w-0">
+          <p className="text-[12.5px] font-medium text-brand-600 md:text-[14px]">{cleanName(category?.name) || shop.category_label}</p>
+          <h2 className="mt-0.5 font-head text-[26px] font-extrabold leading-tight text-ink sm:text-[28px] md:text-[34px]">{shop.name}</h2>
+            </div>
+          </div>
+          {shop.description && <p className="mt-3 text-[14px] leading-relaxed text-[#4d5f5c] md:mb-8 md:mt-5 md:text-[16px]">{shop.description}</p>}
+
+          <dl className="mt-5 divide-y divide-[#edf2f1] rounded-2xl border border-[#e6eeec] text-[13.5px] md:mt-auto md:text-[15px]">
             {[
               [MapPin, t('ที่ตั้ง'), [zoneName, shop.unit_no && t('ล็อก {u}', { u: shop.unit_no })].filter(Boolean).join(' · ')],
               [Clock, t('เวลาเปิด-ปิด'), shop.open_hours && formatHours(shop.open_hours, t)],
@@ -216,21 +237,44 @@ function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
             ]
               .filter(([, , v]) => v)
               .map(([Icon, label, value]) => (
-                <div key={label} className="flex items-center gap-3 px-4 py-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
-                    <Icon className="size-4" strokeWidth={2} />
+                <div key={label} className="flex items-center gap-3 px-4 py-3 md:gap-4 md:px-5 md:py-4">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600 md:size-10 md:rounded-xl">
+                    <Icon className="size-4 md:size-5" strokeWidth={2} />
                   </span>
-                  <dt className="w-24 shrink-0 text-muted">{label}</dt>
+                  <dt className="w-24 shrink-0 text-muted md:w-28">{label}</dt>
                   <dd className="font-medium text-ink">{value}</dd>
                 </div>
               ))}
           </dl>
 
-          <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
+          {(shop.facebook || shop.instagram) && (
+            <div className="mt-3 flex flex-wrap gap-2 md:mt-4">
+              {[
+                [shop.facebook, 'Facebook', '#1877f2', 'M14 8h2.5V5H14c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3h-3V9c0-.6.4-1 1-1Z'],
+                [shop.instagram, 'Instagram', '#e1306c', 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm5.5-1.8a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z'],
+              ]
+                .filter(([url]) => url)
+                .map(([url, label, color, d]) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 items-center gap-2 rounded-full border border-[#e6eeec] px-3.5 text-[13px] font-semibold text-ink transition hover:border-current md:h-10 md:px-4 md:text-[14px]"
+                    style={{ color }}
+                  >
+                    <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" fillRule="evenodd" aria-hidden="true"><path d={d} /></svg>
+                    <span className="text-ink">{label}</span>
+                  </a>
+                ))}
+            </div>
+          )}
+
+          <div className="mt-5 grid gap-2.5 sm:grid-cols-2 md:mt-auto md:gap-3 md:pt-8">
             {tel && (
               <a
                 href={`tel:${tel}`}
-                className="flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 text-[14px] font-semibold text-white transition hover:bg-brand-700"
+                className="flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 text-[14px] font-semibold text-white transition hover:bg-brand-700 md:h-12 md:text-[15px]"
               >
                 <Phone className="size-4" /> {t('โทรหาร้าน')}
               </a>
@@ -240,7 +284,7 @@ function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
                 href={mapUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-11 items-center justify-center gap-2 rounded-full border border-brand-200 text-[14px] font-semibold text-brand-700 transition hover:bg-brand-50"
+                className="flex h-11 items-center justify-center gap-2 rounded-full border border-brand-200 text-[14px] font-semibold text-brand-700 transition hover:bg-brand-50 md:h-12 md:text-[15px]"
               >
                 <MapPin className="size-4" /> {t('เส้นทางมาตลาด')}
               </a>
@@ -314,16 +358,18 @@ function LoadMoreButton({ next, remaining, catById, colorOf, onClick }) {
 /*  page                                                                    */
 /* ------------------------------------------------------------------------ */
 
+// categories the database doesn't have yet (e.g. id 9 บริการ & การศึกษา before its SQL runs) come from the defaults
+const withDefaultCategories = (list = []) => [...list, ...defaultData.categories.filter((c) => !list.some((x) => String(x.id) === String(c.id)))]
+
 export default function ShopDirectory({ settings, categories: homeCategories }) {
   const { t, tr } = useI18n()
-  const [data, setData] = useState({ shops: directoryShops, zones: defaultZones, categories: homeCategories })
+  const [data, setData] = useState({ shops: directoryShops, zones: defaultZones, categories: withDefaultCategories(homeCategories) })
   const [params, setParams] = useSearchParams()
   const [now, setNow] = useState(nowMinutes)
 
   const q = params.get('q') || ''
   const cat = params.get('cat') || ''
   const zone = params.get('zone') || ''
-  const building = params.get('building') || ''
   const shopId = params.get('shop')
 
   // database data (falls back to the built-in list while the DB isn't updated)
@@ -336,13 +382,13 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
         setData((d) => ({
           shops: json.shops,
           zones: json.zones?.length ? json.zones : d.zones,
-          categories: json.categories?.length ? json.categories : d.categories,
+          categories: json.categories?.length ? withDefaultCategories(json.categories) : d.categories,
         }))
       })
       .catch(() => {})
     return () => ctrl.abort()
   }, [])
-  useEffect(() => setData((d) => ({ ...d, categories: homeCategories })), [homeCategories])
+  useEffect(() => setData((d) => ({ ...d, categories: withDefaultCategories(homeCategories) })), [homeCategories])
 
   // refresh "open now" every minute
   useEffect(() => {
@@ -366,10 +412,8 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
 
   // everything shown in the current language (src/i18n/translations.js)
   const { shops, zones, categories } = useMemo(() => tr(data), [data, tr])
-  const buildings = useMemo(() => tr(rawBuildings), [tr])
   const catById = useMemo(() => Object.fromEntries(categories.map((c) => [String(c.id), c])), [categories])
   const zoneName = (code) => zones.find((z) => z.code === code)?.name || (code ? t('โซน {code}', { code }) : '')
-  const buildingOf = (zoneCode) => buildings.find((b) => b.zones.includes(zoneCode))
 
   // categories that actually have shops (each with its own colour)
   const shopCategories = useMemo(() => {
@@ -388,9 +432,7 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    const inBuilding = buildings.find((b) => b.code === building)
     return shops.filter((s) => {
-      if (inBuilding && !inBuilding.zones.includes(s.zone)) return false
       if (zone && s.zone !== zone) return false
       if (cat && String(s.category_id) !== cat) return false
       if (!needle) return true
@@ -400,23 +442,18 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
       return hay.includes(needle)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shops, q, cat, zone, building, catById, zones, buildings])
+  }, [shops, q, cat, zone, catById, zones])
 
   const openCount = shops.filter((s) => isOpenNow(s.open_hours, now)).length
-  const filtered = Boolean(q || cat || zone || building)
+  const filtered = Boolean(q || cat || zone)
   const resetAll = () => setParams({}, { preventScrollReset: true })
 
-  // a zone picked on the map also selects its building tab;
-  // a building tab clears a zone that belongs to another building
-  const selectZone = (code) => setParam('zone', code, { building: code ? buildingOf(code)?.code : building })
-  const selectBuilding = (code) => {
-    const keepZone = zone && buildings.find((b) => b.code === code)?.zones.includes(zone)
-    setParam('building', code, { zone: keepZone ? zone : '' })
-  }
+  // a zone picked on the map filters the list (the old ?building= param is dropped)
+  const selectZone = (code) => setParam('zone', code, { building: '' })
 
   // "ดูร้านเพิ่มเติม": show STEP cards, then STEP more per press; a new filter / search starts again
   const [visible, setVisible] = useState(STEP)
-  useEffect(() => setVisible(STEP), [q, cat, zone, building])
+  useEffect(() => setVisible(STEP), [q, cat, zone])
   const shown = results.slice(0, visible)
   const remaining = results.length - shown.length
 
@@ -424,9 +461,9 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
 
   return (
     <>
-      {/* ================= hero (home banner image) + title / search card ================= */}
-      <PageHero settings={settings}>
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.2fr)] lg:items-center lg:gap-8">
+      {/* ================= hero (home banner image) + title / search card, hanging from the banner like the home page ================= */}
+      <PageHero settings={settings} overlap={false}>
+        <div className="grid gap-3 py-2 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.2fr)] lg:items-center lg:gap-8">
           <div>
             <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-[11.5px] text-muted">
               <SmartLink href="/" className="hover:text-brand-700">
@@ -435,7 +472,7 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
               <span>/</span>
               <span className="font-medium text-brand-700">{t('Shop Directory')}</span>
             </nav>
-            <ColorfulText as="h1" animated text={t('Shop Directory')} className="mt-0.5 font-head text-[26px] font-black leading-tight tracking-[-0.01em] sm:text-[30px]" />
+            <h1 className="mt-0.5 font-head text-[26px] font-black leading-tight tracking-[-0.01em] text-brand-700 sm:text-[30px]">{t('Shop Directory')}</h1>
             <p className="mt-0.5 text-[12.5px] text-[#4d5f5c]">
               {t('ค้นหาร้านค้า ร้านอาหาร และบริการทั้งหมดใน {place} ได้ในที่เดียว', { place: tr(settings.address_title) || settings.site_name })}
             </p>
@@ -448,7 +485,7 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
                 type="search"
                 value={q}
                 onChange={(e) => setParam('q', e.target.value)}
-                placeholder={t('ค้นหาชื่อร้าน สินค้า หรือเลขล็อก เช่น กาแฟ, A-08')}
+                placeholder={t('ค้นหาชื่อร้าน สินค้า หรือเลขล็อก เช่น กาแฟ, A137')}
                 aria-label={t('ค้นหาร้านค้า')}
                 className="h-9 min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-[#98a3a1] [&::-webkit-search-cancel-button]:hidden"
               />
@@ -477,12 +514,15 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
               <span>
                 <b className="text-[15px] font-extrabold text-brand-700">{zones.length}</b> {t('โซน')}
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-1.5 animate-pulse rounded-full bg-[#1fb36b]" />
-                <span>
-                  <b className="text-[15px] font-extrabold text-[#13804f]">{openCount}</b> {t('ร้านเปิดอยู่ตอนนี้')}
+              {/* only when shops have opening hours */}
+              {shops.some((s) => s.open_hours) && (
+                <span className="flex items-center gap-1.5">
+                  <span className="size-1.5 animate-pulse rounded-full bg-[#1fb36b]" />
+                  <span>
+                    <b className="text-[15px] font-extrabold text-[#13804f]">{openCount}</b> {t('ร้านเปิดอยู่ตอนนี้')}
+                  </span>
                 </span>
-              </span>
+              )}
             </div>
           </div>
         </div>
@@ -492,35 +532,6 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
       <section className="container-bm pb-16 pt-6">
         {/* ================= market map (3D plan from CAD) ================= */}
         <MarketMap zones={zones} counts={zoneCounts} selected={zone} onSelect={selectZone} />
-
-        {/* ================= building tabs ================= */}
-        <div className="mt-6 flex justify-center">
-          <div className="flex rounded-full bg-[#eef0f0] p-1">
-            {[{ code: '', name: t('All') }, ...buildings].map((b) => {
-              const active = building === b.code
-              return (
-                <button
-                  key={b.code || 'all'}
-                  type="button"
-                  onClick={() => selectBuilding(b.code)}
-                  aria-pressed={active}
-                  className={`rounded-full px-3.5 py-2 text-[12.5px] transition sm:min-w-[150px] sm:px-5 sm:text-[13px] ${
-                    active ? 'bg-white font-semibold text-[#ec1c8c] shadow-[0_2px_8px_-3px_rgb(0_0_0/0.2)]' : 'text-[#5d6c69] hover:text-ink'
-                  }`}
-                >
-                  {b.code ? (
-                    <span className="flex flex-col items-center leading-tight">
-                      <ColorfulText text={b.name} className={`flex-nowrap text-[12px] font-black sm:text-[12.5px] ${active ? '' : 'opacity-70'}`} />
-                      <span className="hidden text-[9.5px] font-normal text-[#8a9795] sm:block">{b.label}</span>
-                    </span>
-                  ) : (
-                    b.name
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </div>
 
         {/* ================= category icons ================= */}
         <div className="-mx-4 mt-5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -582,8 +593,6 @@ export default function ShopDirectory({ settings, categories: homeCategories }) 
                 <ShopCard
                   shop={s}
                   category={catById[s.category_id]}
-                  building={buildingOf(s.zone)}
-                  open={isOpenNow(s.open_hours, now)}
                   onOpen={() => setParam('shop', String(s.id))}
                 />
               </div>

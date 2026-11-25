@@ -241,7 +241,7 @@ INSERT INTO footer_links (group_key, label, url, sort_order) VALUES
 ('quick',   'ค้นหาร้านค้า',            '/shops',    3),
 ('quick',   'โปรโมชั่น',               '#events',   4),
 ('quick',   'กิจกรรม',                '#events',   5),
-('quick',   'ข่าวสารและประกาศ',        '#news',     6),
+('quick',   'ข่าวสารและประกาศ',        '/news',     6),
 ('service', 'พื้นที่ให้เช่าร้านค้า',        '#contact',  1),
 ('service', 'ที่จอดรถกว่า 500 คัน',      '#visit',    2),
 ('service', 'รถเข็นผู้สูงอายุ (ฟรี)',      '#visit',    3),

@@ -46,7 +46,7 @@ export const defaultData = {
     { id: 3, group_key: 'quick', label: 'ค้นหาร้านค้า', url: '/shops' },
     { id: 4, group_key: 'quick', label: 'โปรโมชั่น', url: '#events' },
     { id: 5, group_key: 'quick', label: 'กิจกรรม', url: '#events' },
-    { id: 6, group_key: 'quick', label: 'ข่าวสารและประกาศ', url: '#news' },
+    { id: 6, group_key: 'quick', label: 'ข่าวสารและประกาศ', url: '/news' },
     { id: 7, group_key: 'service', label: 'พื้นที่ให้เช่าร้านค้า', url: '#contact' },
     { id: 8, group_key: 'service', label: 'ที่จอดรถกว่า 500 คัน', url: '#visit' },
     { id: 9, group_key: 'service', label: 'รถเข็นผู้สูงอายุ (ฟรี)', url: '#visit' },
@@ -101,6 +101,7 @@ export const defaultData = {
     { id: 6, name: 'ของใช้ในบ้าน', icon: 'gift', color: 'orange' },
     { id: 7, name: 'ดูดวง & โหราศาสตร์', icon: 'sparkles', color: 'yellow' },
     { id: 8, name: 'แผนที่ & การเดินทาง', icon: 'map', color: 'teal', link: '#visit' },
+    { id: 9, name: 'บริการ & การศึกษา', icon: 'service', color: 'teal' },
   ],
 
   shops: [
