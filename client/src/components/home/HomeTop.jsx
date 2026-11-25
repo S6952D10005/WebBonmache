@@ -73,7 +73,7 @@ export function HeadlineTab({ tabs = [] }) {
               onPointerEnter={(e) => mouse(e) && show(x.id)}
               onClick={(e) => (e.nativeEvent.pointerType === 'mouse' ? show(x.id) : toggle(x.id))}
               style={{ '--c': x.color || '#138377' }}
-              className="group relative flex flex-col items-center justify-center gap-1.5 px-1 py-1.5 text-center outline-none sm:flex-row sm:gap-3 sm:px-3 sm:py-2 sm:text-left"
+              className="group relative flex flex-col items-center justify-center gap-1 px-1 py-1 text-center outline-none sm:flex-row sm:gap-2.5 sm:px-3 sm:py-1.5 sm:text-left"
             >
               {/* hover / open background – a soft wash of the topic colour */}
               <span
@@ -85,18 +85,18 @@ export function HeadlineTab({ tabs = [] }) {
                 }`}
               />
               <span
-                className={`relative grid size-10 shrink-0 place-items-center rounded-full transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:size-11 ${
+                className={`relative grid size-8 shrink-0 place-items-center rounded-full transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:size-9 ${
                   on
                     ? 'rotate-[-6deg] scale-110 bg-[var(--c)] text-white shadow-[0_8px_18px_-8px_var(--c)]'
                     : 'bg-[color-mix(in_srgb,var(--c)_14%,white)] text-[var(--c)] group-hover:rotate-[-6deg] group-hover:scale-110 group-hover:bg-[var(--c)] group-hover:text-white group-hover:shadow-[0_8px_18px_-8px_var(--c)]'
                 }`}
               >
-                <Icon className="size-[19px] sm:size-5" strokeWidth={2} />
+                <Icon className="size-4 sm:size-[18px]" strokeWidth={2} />
               </span>
               <span className="relative min-w-0">
                 <span className="flex items-center justify-center gap-1 sm:justify-start">
                   <span
-                    className={`text-[11.5px] font-bold leading-tight transition-colors duration-300 sm:text-[15px] ${
+                    className={`text-[11.5px] font-bold leading-tight transition-colors duration-300 sm:text-[14px] ${
                       on ? 'text-[var(--c)]' : 'text-ink group-hover:text-[var(--c)]'
                     }`}
                   >
@@ -112,7 +112,7 @@ export function HeadlineTab({ tabs = [] }) {
               {/* bar in the topic colour under the open / pointed topic */}
               <span
                 aria-hidden="true"
-                className={`absolute -bottom-[7px] left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-[var(--c)] transition-all duration-300 sm:-bottom-[9px] ${
+                className={`absolute -bottom-[5px] left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-[var(--c)] transition-all duration-300 sm:-bottom-[7px] ${
                   on ? 'w-12 opacity-100' : 'w-0 opacity-0 group-hover:w-8 group-hover:opacity-60'
                 }`}
               />
@@ -128,7 +128,7 @@ export function HeadlineTab({ tabs = [] }) {
         inert={!open}
         // pt = the card's bottom padding + a 10px gap; the padding still counts as "inside", so the mouse can cross it
         // --edge = how far the panel reaches past the bar on each side (to the card's edges)
-        className={`absolute inset-x-0 top-full z-40 pt-6 transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [--edge:0px] sm:-inset-x-6 sm:pt-[26px] sm:[--edge:24px] ${
+        className={`absolute inset-x-0 top-full z-40 pt-4 transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [--edge:0px] sm:-inset-x-6 sm:pt-[18px] sm:[--edge:24px] ${
           open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
         }`}
       >

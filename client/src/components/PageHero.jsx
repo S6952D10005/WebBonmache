@@ -9,7 +9,8 @@ import { useParallax } from './ScrollFx'
  * sits centred on the bottom edge of the image (half over it, half below).
  * If something inside the card has `data-hero-anchor`, that part is centred on
  * the edge instead, so whatever opens below it grows downwards only.
- * overlap={false} → the card sits fully below the image instead (home page menu).
+ * overlap={false} → the card hangs from the image's bottom edge instead (flat top,
+ *   rounded bottom, no gap) – the home page menu bar.
  */
 export default function PageHero({ settings, children, overlap = true }) {
   const parallax = useParallax(0.3, 1.1)
@@ -45,10 +46,15 @@ export default function PageHero({ settings, children, overlap = true }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-[120px] bg-gradient-to-b from-[#06302c]/45 via-[#06302c]/15 to-transparent lg:block" />
       </div>
 
-      <div className={`container-bm relative z-20 ${overlap ? '' : 'pt-6 sm:pt-8'}`} style={{ marginTop: overlap ? -half : 0 }}>
+      <div className="container-bm relative z-20" style={{ marginTop: overlap ? -half : 0 }}>
         <div
           ref={card}
-          className="mx-auto max-w-[1040px] rounded-[20px] border border-white/60 bg-white/90 px-4 py-3.5 shadow-[0_14px_32px_-18px_rgb(12_80_72/0.45)] backdrop-blur-md sm:px-6 sm:py-4"
+          className={`mx-auto max-w-[1040px] px-4 sm:px-6 ${overlap ? 'py-3.5 sm:py-4' : 'py-1.5 sm:py-2'} ${
+            overlap
+              ? 'rounded-[20px] border border-white/60 bg-white/90 shadow-[0_14px_32px_-18px_rgb(12_80_72/0.45)] backdrop-blur-md'
+              : // attached: hangs from the image's bottom edge – flat top, rounded bottom, no gap
+                'rounded-b-[22px] border-x border-b border-[#e6eeec] bg-white shadow-[0_18px_34px_-22px_rgb(12_80_72/0.5)]'
+          }`}
         >
           {children}
         </div>
