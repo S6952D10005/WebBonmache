@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   Award,
@@ -135,7 +135,7 @@ function BrandIcon({ platform, className = 'size-4' }) {
 function PostCard({ post: p, page }) {
   const { t } = useI18n()
   const pf = PLATFORM[p.platform] || PLATFORM.facebook
-  const video = p.platform === 'youtube' || p.platform === 'tiktok'
+  const video = p.video || p.platform === 'youtube' || p.platform === 'tiktok'
   return (
     <SmartLink
       href={p.url}
@@ -225,6 +225,36 @@ function PostCard({ post: p, page }) {
       </div>
     </SmartLink>
   )
+}
+
+/*
+ * Real posts from the market's Facebook Page / Instagram (server: GET /api/social,
+ * set up in server/SOCIAL-SETUP.md). Returns null until real posts arrive – then
+ * the feed swaps its sample cards for them. No server / not set up → stays null.
+ */
+const DATE_LOCALE = { th: 'th-TH', en: 'en-GB', zh: 'zh-CN' }
+export function useLivePosts() {
+  const { lang } = useI18n()
+  const [rows, setRows] = useState(null)
+  useEffect(() => {
+    const ctrl = new AbortController()
+    fetch('/api/social', { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => json?.posts?.length && setRows(json.posts))
+      .catch(() => {
+        /* no API (e.g. the Vercel test site) → keep the sample posts */
+      })
+    return () => ctrl.abort()
+  }, [])
+  if (!rows) return null
+  // "3 พ.ย. 2569 · 10:00" (Thai Buddhist year) / "3 Nov 2026 · 10:00" / "2026年11月3日 · 10:00"
+  const locale = DATE_LOCALE[lang] || 'th-TH'
+  const day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
+  return rows.map((p) => {
+    const d = new Date(p.time)
+    return { ...p, date: Number.isNaN(+d) ? '' : `${day.format(d)} · ${time.format(d)}` }
+  })
 }
 
 export function SocialFeed({ links = [], posts = [], page = 'Bon Marché' }) {

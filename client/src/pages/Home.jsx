@@ -3,7 +3,7 @@ import PageHero from '../components/PageHero'
 import LeasingBanner from '../components/LeasingBanner'
 import { HeadlineTab, HeroSlider, QuickLinks } from '../components/home/HomeTop'
 import { Events, FoodArticles, FoodBrands, Happening, News } from '../components/home/HomeFeeds'
-import { Awards, GettingHere, SocialFeed } from '../components/home/HomeBottom'
+import { Awards, GettingHere, SocialFeed, useLivePosts } from '../components/home/HomeBottom'
 import { HOME } from '../data/homeData'
 import { useI18n } from '../i18n'
 
@@ -18,6 +18,8 @@ import { useI18n } from '../i18n'
 export default function Home({ settings }) {
   const { tr } = useI18n()
   const data = useMemo(() => tr(HOME), [tr])
+  // real Facebook / Instagram posts once the server is set up; sample posts until then
+  const livePosts = useLivePosts()
 
   return (
     <>
@@ -41,7 +43,7 @@ export default function Home({ settings }) {
       <Events items={data.events} />
       <News items={data.news} />
       <Awards items={data.awards} />
-      <SocialFeed links={data.social.links} posts={data.social.posts} page={settings.site_name} />
+      <SocialFeed links={data.social.links} posts={livePosts || data.social.posts} page={settings.site_name} />
       <div className="pt-16 lg:pt-20">
         <LeasingBanner settings={settings} />
       </div>

@@ -3,6 +3,7 @@ import cors from 'cors'
 import 'dotenv/config'
 import { pool } from './db.js'
 import homeRoutes from './routes/home.js'
+import socialRoutes from './routes/social.js'
 
 const app = express()
 const PORT = Number(process.env.PORT || 5000)
@@ -20,6 +21,7 @@ app.get('/api/health', async (_req, res) => {
 })
 
 app.use('/api', homeRoutes)
+app.use('/api', socialRoutes) // GET /api/social – latest Facebook / Instagram posts
 
 // Explain common MySQL errors in plain words (Thai) so they are easy to fix
 function dbHint(err) {
