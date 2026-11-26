@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import PageHero from '../components/PageHero'
+import LeasingBanner from '../components/LeasingBanner'
 import { HeadlineTab, HeroSlider, QuickLinks } from '../components/home/HomeTop'
 import { Events, FoodArticles, FoodBrands, Happening, News } from '../components/home/HomeFeeds'
 import { Awards, GettingHere, SocialFeed } from '../components/home/HomeBottom'
@@ -7,11 +8,11 @@ import { HOME } from '../data/homeData'
 import { useI18n } from '../i18n'
 
 /**
- * หน้าแรก (/home) – the page the menu's "หน้าแรก" and the logo open.
- * ("/" stays the start page that opens first.)
+ * หน้าแรก (/) – the page the site opens on; the menu's "หน้าแรก" and the logo link here.
+ * Menu links jump to sections on it: #events, #leasing (ร่วมธุรกิจกับเรา), #visit (Visit Us / map).
  *
  * Top to bottom: banner image with the Headline tab card (panel hidden until clicked) · Hero slider · Happening · Quick links ·
- * Food articles · Food brands · All events · News · Awards · Social · Map (getting here).
+ * Food articles · Food brands · All events · News · Awards · Social · Leasing banner · Map (getting here).
  * Content: src/data/homeData.js
  */
 export default function Home({ settings }) {
@@ -41,6 +42,9 @@ export default function Home({ settings }) {
       <News items={data.news} />
       <Awards items={data.awards} />
       <SocialFeed links={data.social.links} posts={data.social.posts} page={settings.site_name} />
+      <div className="pt-16 lg:pt-20">
+        <LeasingBanner settings={settings} />
+      </div>
       <GettingHere settings={settings} info={data.gettingHere} />
     </>
   )

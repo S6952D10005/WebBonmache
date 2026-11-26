@@ -126,7 +126,7 @@ export function Logo({ name = 'Bon Marché', tagline = 'Fresh • Healthy • Co
   // the mark already reads "Bon", so the word next to it completes the name ("Marché")
   const word = /^bon\s+/i.test(name) ? name.replace(/^bon\s+/i, '') : name
   return (
-    <SmartLink href="/home" aria-label={name} className="flex shrink-0 items-end gap-2">
+    <SmartLink href="/" aria-label={name} className="flex shrink-0 items-end gap-2">
       <LogoMark light={light} className={size} />
       <span className="mb-[3px] whitespace-nowrap leading-none">
         <span className={`block font-head text-[24px] font-extrabold tracking-tight ${light ? 'text-white' : 'text-brand-700'}`}>

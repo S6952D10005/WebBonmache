@@ -317,7 +317,7 @@ export function GettingHere({ settings = {}, info = {} }) {
   const socials = (info.socials || []).filter((s) => s.url)
 
   return (
-    <section id="getting-here" className="container-bm scroll-mt-24 pb-16 pt-16 lg:pb-20 lg:pt-20">
+    <section id="visit" className="container-bm scroll-mt-24 pb-16 pt-16 lg:pb-20 lg:pt-20">
       <div className="grid overflow-hidden rounded-[22px] bg-[#0b2523] shadow-[0_20px_44px_-28px_rgb(6_48_44/0.7)] lg:grid-cols-[1fr_380px]">
         <div className="relative h-[280px] bg-[#e8ecea] sm:h-[340px] lg:h-auto lg:min-h-[420px]">
           <iframe

@@ -65,7 +65,7 @@ export default function News({ settings }) {
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-8">
           <div>
             <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-[11.5px] text-muted">
-              <SmartLink href="/home" className="hover:text-brand-700">
+              <SmartLink href="/" className="hover:text-brand-700">
                 {t('หน้าแรก')}
               </SmartLink>
               <span>/</span>

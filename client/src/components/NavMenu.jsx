@@ -36,7 +36,7 @@ export const isActive = (m, url) => m.url === url || !!m.children?.some((c) => c
  */
 export function useActiveMenu(menus) {
   const { pathname, hash } = useLocation()
-  const [active, setActive] = useState(() => (pathname === '/' ? hash || '#' : pathname))
+  const [active, setActive] = useState(() => (pathname === '/' ? hash || '/' : pathname))
   const lockUntil = useRef(0)
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function useActiveMenu(menus) {
     const onScroll = () => {
       if (Date.now() < lockUntil.current) return // a click is scrolling the page – keep the clicked menu
       const doc = document.documentElement
-      let current = '#'
+      let current = '/' // top of the home page → "หน้าแรก"
       let best = -Infinity
       // a section counts once its top has reached the upper 40% of the screen
       const line = window.innerHeight * 0.4

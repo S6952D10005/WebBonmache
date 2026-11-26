@@ -1,12 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { Route, Routes, useLocation } from 'react-router'
+import { Navigate, Route, Routes, useLocation } from 'react-router'
 import Header from './components/Header'
-import Hero from './components/Hero'
-import ThisWeek from './components/ThisWeek'
-import Categories from './components/Categories'
-import MustTry from './components/MustTry'
-import VisitInfo from './components/VisitInfo'
-import LeasingBanner from './components/LeasingBanner'
 import Footer from './components/Footer'
 import SmartLink from './components/SmartLink'
 import ShopDirectory from './pages/ShopDirectory'
@@ -17,12 +11,12 @@ import { defaultData } from './data/defaultData'
 import { useI18n } from './i18n'
 
 /*
- * "/"     = start page (หน้าเริ่มต้น): what opens first – not in the menu
- * "/home" = home page (หน้าแรก): what the menu's "หน้าแรก" and the logo open
+ * "/" = home page (หน้าแรก) – the site opens here; the menu's "หน้าแรก" and the logo link here.
+ * "/home" (the home page's old address) redirects to "/".
  */
-export const HOME_URL = '/home'
-// older menu rows still point "หน้าแรก" at "#" (top of the start page) → send them to the home page
-const toHome = (list) => list.map((m) => (m.url === '#' ? { ...m, url: HOME_URL } : m))
+export const HOME_URL = '/'
+// older menu rows point "หน้าแรก" at "#" or "/home" → the home page
+const toHome = (list) => list.map((m) => (m.url === '#' || m.url === '/home' ? { ...m, url: HOME_URL } : m))
 
 /** Merge API data over the defaults so the page always renders. */
 function merge(api) {
@@ -30,10 +24,7 @@ function merge(api) {
   return {
     settings: { ...defaultData.settings, ...(api?.settings || {}) },
     menus: toHome(pick(api?.menus, defaultData.menus)),
-    highlights: pick(api?.highlights, defaultData.highlights),
     categories: pick(api?.categories, defaultData.categories),
-    shops: pick(api?.shops, defaultData.shops),
-    visitInfo: pick(api?.visitInfo, defaultData.visitInfo),
     footerLinks: toHome(pick(api?.footerLinks, defaultData.footerLinks)),
   }
 }
@@ -71,20 +62,6 @@ function useTransitionOrigin() {
 
 // browsers without View Transitions (e.g. Firefox) get a simple fade-in instead
 const hasViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document
-
-function HomePage({ data }) {
-  const { settings, highlights, categories, shops, visitInfo } = data
-  return (
-    <>
-      <Hero settings={settings} />
-      <ThisWeek items={highlights} siteName={settings.site_name} />
-      <Categories items={categories} />
-      <MustTry items={shops} />
-      <VisitInfo items={visitInfo} image={settings.visit_image} mapUrl={settings.visit_map_url} />
-      <LeasingBanner settings={settings} />
-    </>
-  )
-}
 
 function NotFound() {
   const { t } = useI18n()
@@ -134,8 +111,8 @@ export default function App() {
         {/* page transition: View Transitions (circle reveal, index.css); fallback = fade-in */}
         <div key={pathname} className={hasViewTransitions ? '' : 'animate-page-enter'}>
           <Routes>
-            <Route path="/" element={<HomePage data={view} />} />
-            <Route path={HOME_URL} element={<Home settings={settings} />} />
+            <Route path="/" element={<Home settings={settings} />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/shops" element={<ShopDirectory settings={settings} categories={categories} />} />
             <Route path="/news" element={<News settings={settings} />} />
             <Route path="*" element={<NotFound />} />
