@@ -4,9 +4,13 @@ import 'dotenv/config'
 import { pool } from './db.js'
 import homeRoutes from './routes/home.js'
 import socialRoutes from './routes/social.js'
+import contactRoutes from './routes/contact.js'
 
 const app = express()
 const PORT = Number(process.env.PORT || 5000)
+// behind the host's web server (Hostatom) / the Vite dev proxy: take the visitor's address from the
+// first proxy, so the contact form's "messages per visitor" limit counts each visitor separately
+app.set('trust proxy', 1)
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }))
 app.use(express.json())
@@ -22,6 +26,7 @@ app.get('/api/health', async (_req, res) => {
 
 app.use('/api', homeRoutes)
 app.use('/api', socialRoutes) // GET /api/social – latest Facebook / Instagram posts
+app.use('/api', contactRoutes) // POST /api/contact – messages from the Contact page form
 
 // Explain common MySQL errors in plain words (Thai) so they are easy to fix
 function dbHint(err) {

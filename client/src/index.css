@@ -27,12 +27,11 @@
 
   /*
    * Fonts for the whole site:
-   *  - English / numbers: "Nunito Sans"
-   *  - Thai: "Noto Sans Thai" (Nunito Sans has no Thai letters)
+   *  - English / numbers: "Roboto"
+   *  - Thai: "Noto Sans Thai" (Roboto has no Thai letters; Noto Sans Thai is drawn to match it)
    * The browser picks the right one per character automatically.
-   * (The variable keeps its old name --font-roboto so nothing else has to change.)
    */
-  --font-roboto: "Nunito Sans", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-roboto: "Roboto", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-roboto);
   --font-head: var(--font-roboto);
   --font-display: var(--font-roboto);
@@ -46,6 +45,12 @@
   @keyframes card-in {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Shop Directory search: blinking cursor after the words that type themselves */
+  --animate-caret: caret-blink 1s step-end infinite;
+  @keyframes caret-blink {
+    50% { opacity: 0; }
   }
 
   /* multi-colour title "running lights": letters hop in turn + a shine sweeps across */

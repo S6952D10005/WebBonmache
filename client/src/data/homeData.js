@@ -11,7 +11,11 @@
  */
 
 export const HOME = {
-  /* ---------- Headline tab: การ์ดขาวบนขอบรูปพื้นหลัง กดหัวข้อเพื่อเปิดดู (icon: Utensils | ShoppingBag | Store) ---------- */
+  /* ---------- Headline tab: การ์ดขาวบนขอบรูปพื้นหลัง กดหัวข้อเพื่อเปิดดู (icon: Utensils | ShoppingBag | Store) ----------
+   * ข้อมูลจริงจากในเว็บ: หมวด (cat) และโซน (zone) ตรงกับหน้า Shop Directory · ร้านจริงจาก src/data/directoryData.js
+   *   links = ลิงก์ซ้าย · cards = การ์ดรูป 2 ใบ (ร้านจริง: url '/shops?shop=<id ร้าน>' = เปิดป๊อปอัปร้านนั้นในหน้า Shop Directory)
+   *   cat: 1 อาหาร & เครื่องดื่ม · 2 ผักผลไม้ ของสด · 3 แฟชั่น & ไลฟ์สไตล์ · 4 คาเฟ่ & ร้านอาหาร · 5 สุขภาพ & ความงาม
+   *        6 ของใช้ในบ้าน · 7 ดูดวง & โหราศาสตร์ · 9 บริการ & การศึกษา · zone FC = ศูนย์อาหาร (ฟู้ดคอร์ท) */
   headline: {
     tabs: [
       {
@@ -19,16 +23,17 @@ export const HOME = {
         icon: 'Utensils',
         color: '#f37021', // topic colour (hover, icon, underline)
         label: 'ร้านอาหารแนะนำ',
-        hint: 'ร้านเด็ดประจำสัปดาห์', // short line under the label
-        intro: 'คัดร้านเด็ดประจำสัปดาห์ ทั้งของคาว ของหวาน และเครื่องดื่ม',
+        hint: 'ฟู้ดคอร์ท · คาเฟ่ · ของฝาก', // short line under the label
+        intro: 'ฟู้ดคอร์ทในสวนริมบึง ร้านดังอย่าง Starbucks และ Dairy Queen คาเฟ่ เบเกอรี่ และขนมของฝากเจ้าเก่าของตลาด',
         links: [
-          { label: 'อาหารและเครื่องดื่ม', url: '/shops?cat=1' },
-          { label: 'คาเฟ่และร้านขนม', url: '/shops?cat=4' },
+          { label: 'อาหาร & เครื่องดื่ม', url: '/shops?cat=1' },
+          { label: 'คาเฟ่ & ร้านอาหาร', url: '/shops?cat=4' },
+          { label: 'ร้านในฟู้ดคอร์ท', url: '/shops?zone=FC' },
           { label: 'ผักผลไม้ ของสด', url: '/shops?cat=2' },
         ],
         cards: [
-          { title: 'แนะนำร้านอาหาร', image: '/images/shop-1.jpg', url: '/shops?cat=1' },
-          { title: 'คาเฟ่ห้ามพลาด', image: '/images/week-2.jpg', url: '/shops?cat=4' },
+          { title: 'ข้าวมันไก่ซั่งไห่', image: '/images/shops/sang-hai-3.webp', url: '/shops?shop=34' },
+          { title: 'Wolf Croissant', image: '/images/shops/wolf-2.webp', url: '/shops?shop=21' },
         ],
       },
       {
@@ -37,15 +42,16 @@ export const HOME = {
         color: '#ec1c8c',
         label: 'ช้อปปิ้ง',
         hint: 'แฟชั่น · ของใช้ · สุขภาพ',
-        intro: 'แฟชั่น ของใช้ และสินค้าสุขภาพ ครบในที่เดียว',
+        intro: 'เสื้อผ้า กระเป๋า เครื่องประดับ ผ้าไหมไทย ของใช้ในบ้าน และร้านสุขภาพ ในพลาซ่าทั้ง 6 อาคาร',
         links: [
-          { label: 'แฟชั่นและไลฟ์สไตล์', url: '/shops?cat=3' },
-          { label: 'สุขภาพและความงาม', url: '/shops?cat=6' },
-          { label: 'ของใช้ในบ้าน', url: '/shops?cat=7' },
+          { label: 'แฟชั่น & ไลฟ์สไตล์', url: '/shops?cat=3' },
+          { label: 'สุขภาพ & ความงาม', url: '/shops?cat=5' },
+          { label: 'ของใช้ในบ้าน', url: '/shops?cat=6' },
+          { label: 'ดูดวง & โหราศาสตร์', url: '/shops?cat=7' },
         ],
         cards: [
-          { title: 'แนะนำร้านเสื้อผ้า', image: '/images/week-5.jpg', url: '/shops?cat=3' },
-          { title: 'สินค้าสุขภาพ', image: '/images/week-3.jpg', url: '/shops?cat=6' },
+          { title: 'Madame Pearl', image: '/images/shops/madame-pearl-2.webp', url: '/shops?shop=18' },
+          { title: 'Soulmate', image: '/images/shops/soulmate-1.webp', url: '/shops?shop=19' },
         ],
       },
       {
@@ -54,15 +60,16 @@ export const HOME = {
         color: '#00a3e0',
         label: 'ร้านค้าและบริการ',
         hint: 'แผนผัง · ที่จอดรถ · เช่าพื้นที่',
-        intro: 'บริการที่จอดรถ จุดรับส่ง และสิ่งอำนวยความสะดวกในตลาด',
+        intro: 'แผนผังตลาด 3 มิติ ที่จอดรถกว่า 500 คัน รถเข็นผู้สูงอายุและรถเข็นสัตว์เลี้ยงฟรี พร้อมพื้นที่ให้เช่าสำหรับร้านค้า',
         links: [
           { label: 'แผนผังและร้านค้าทั้งหมด', url: '/shops' },
-          { label: 'การเดินทาง', url: '/#visit' },
-          { label: 'เช่าพื้นที่', url: '/#leasing' },
+          { label: 'บริการ & การศึกษา', url: '/shops?cat=9' },
+          { label: 'การเดินทาง · ที่จอดรถ', url: '/#visit' },
+          { label: 'ติดต่อเรา', url: '/contact' },
         ],
         cards: [
-          { title: 'แผนผังตลาด', image: '/images/visit-banner.webp', url: '/shops' },
-          { title: 'เช่าพื้นที่ขายของ', image: '/images/leasing-banner.webp', url: '/#leasing' },
+          { title: 'แผนผังตลาด 3 มิติ', image: '/images/about/aerial.webp', url: '/shops' },
+          { title: 'เช่าพื้นที่ขายของ', image: '/images/about/zone-plaza.webp', url: '/#leasing' },
         ],
       },
     ],
@@ -356,7 +363,7 @@ export const HOME = {
     title: 'การเดินทาง',
     text: 'ตลาดสดพรีเมียมและคอมมูนิตี้ย่านจตุจักร ใกล้รถไฟฟ้าสายสีแดง สถานีวัดเสมียนนารี มีที่จอดรถกว่า 500 คัน',
     place: 'บองมาร์เช่ มาร์เก็ตพาร์ค',
-    address: '105/1 ถ.เทศบาลสงเคราะห์ ลาดยาว จตุจักร กรุงเทพ 10900',
+    address: '105 ถนน เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพมหานคร 10900',
     hours: 'วันจันทร์ – วันอาทิตย์ 05.00 – 22.00 น.',
     phone: '02-953-8980',
     mapQuery: 'บอง มาเช่ร์',

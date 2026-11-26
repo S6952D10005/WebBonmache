@@ -24,10 +24,10 @@ export const defaultData = {
     leasing_button: 'สอบถามข้อมูลเพิ่มเติม',
     // ---- footer / contact (source: bonmarche.co.th/contact) ----
     address_title: 'บองมาร์เช่ มาร์เก็ตพาร์ค',
-    address: '105/1 ถ.เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
+    address: '105 ถนน เทศบาลสงเคราะห์ แขวงลาดยาว เขตจตุจักร กรุงเทพมหานคร 10900',
     opening_hours: 'ทุกวัน 05.00 – 22.00 น.',
     phone: '02-953-8980',
-    email: 'info@bonmarche.co.th', // placeholder – the official site lists no e-mail
+    email: 'contact@bonmarche.co.th',
     map_url: 'https://goo.gl/maps/oYkWq3kYKCFHew236',
     footer_description:
       'ตลาดสดพรีเมียมและคอมมูนิตี้ย่านจตุจักร มาตรฐานตลาดระดับเพชร และรางวัล Bangkok Premium Market 2565 อาหารดี ของใช้ปลอดภัย เพื่อสุขภาพที่ยั่งยืน',
@@ -37,26 +37,28 @@ export const defaultData = {
     instagram_url: 'https://www.instagram.com/bonmarchemarket/',
     youtube_url: '',
     line_url: 'https://line.me/R/ti/p/@mzn5714l',
+    // TODO: temporary – TikTok's home page until the market's own account link is known
+    //       (e.g. 'https://www.tiktok.com/@ชื่อบัญชี'); '' hides the TikTok buttons
+    tiktok_url: 'https://www.tiktok.com/',
   },
 
-  // footer link columns (group: quick | service | legal)
+  // footer link columns (group: quick = every page of the site | service = services, linking to where they're explained
+  // | legal = small links in the bottom bar – none yet: add terms / privacy here once those pages exist)
+  // url: '/page' = a page · '#section' = a part of the home page (works from every page) · 'https://…' = another site
   footerLinks: [
     { id: 1, group_key: 'quick', label: 'หน้าแรก', url: '/' },
-    { id: 2, group_key: 'quick', label: 'เกี่ยวกับเรา', url: '#about' },
     { id: 3, group_key: 'quick', label: 'ค้นหาร้านค้า', url: '/shops' },
-    { id: 4, group_key: 'quick', label: 'โปรโมชั่น', url: '#events' },
-    { id: 5, group_key: 'quick', label: 'กิจกรรม', url: '#events' },
+    { id: 17, group_key: 'quick', label: 'บทความ', url: '/blog' },
     { id: 6, group_key: 'quick', label: 'ข่าวสารและประกาศ', url: '/news' },
-    { id: 7, group_key: 'service', label: 'พื้นที่ให้เช่าร้านค้า', url: '#contact' },
+    { id: 4, group_key: 'quick', label: 'กิจกรรมและโปรโมชั่น', url: '#events' },
+    { id: 2, group_key: 'quick', label: 'เกี่ยวกับเรา', url: '/about' },
+    { id: 18, group_key: 'quick', label: 'ติดต่อเรา', url: '/contact' },
+    { id: 7, group_key: 'service', label: 'พื้นที่ให้เช่าร้านค้า', url: '#leasing' },
     { id: 8, group_key: 'service', label: 'ที่จอดรถกว่า 500 คัน', url: '#visit' },
     { id: 9, group_key: 'service', label: 'รถเข็นผู้สูงอายุ (ฟรี)', url: '#visit' },
     { id: 10, group_key: 'service', label: 'รถเข็นสัตว์เลี้ยง (ฟรี)', url: '#visit' },
-    { id: 11, group_key: 'service', label: 'ตลาดมาตรฐานระดับเพชร', url: '#about' },
+    { id: 11, group_key: 'service', label: 'ตลาดมาตรฐานระดับเพชร', url: '/about' },
     { id: 12, group_key: 'service', label: 'ระบบผู้ประกอบการ', url: 'https://invoice.bonmarche.co.th/InvoiceSender/fe/#/' },
-    { id: 13, group_key: 'legal', label: 'ข้อกำหนดการใช้งาน', url: '#' },
-    { id: 14, group_key: 'legal', label: 'นโยบายความเป็นส่วนตัว', url: '#' },
-    { id: 15, group_key: 'legal', label: 'นโยบายคุกกี้', url: '#' },
-    { id: 16, group_key: 'legal', label: 'แผนผังเว็บไซต์', url: '#' },
   ],
 
   // main menu; `children` = dropdown items (same as nav_menus in the database)
@@ -79,9 +81,9 @@ export const defaultData = {
       ],
     },
     { id: 2, label: 'Shop Directory', url: '/shops', has_dropdown: 0 },
-    { id: 3, label: 'Blog', url: '#blog', has_dropdown: 0 },
-    { id: 5, label: 'About Us', url: '#about', has_dropdown: 0 },
-    { id: 6, label: 'Contact', url: '#contact', has_dropdown: 0 },
+    { id: 3, label: 'Blog', url: '/blog', has_dropdown: 0 },
+    { id: 5, label: 'About Us', url: '/about', has_dropdown: 0 },
+    { id: 6, label: 'Contact', url: '/contact', has_dropdown: 0 },
   ],
 
   highlights: [

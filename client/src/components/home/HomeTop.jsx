@@ -364,38 +364,50 @@ function BannerSlide({ slide: s, active }) {
 }
 
 /* ======================================================================== */
-/*  Quick links – a row of 4 cards under the slider (not overlapping it).   */
-/*  Each card has its own colour (homeData: color): on hover the card lifts, */
-/*  gets a wash + border of that colour, the icon fills and tilts and the    */
-/*  arrow turns into a filled circle that slides forward.                    */
+/*  Quick links – ONE white bar split into 4 parts (2 × 2 on phones), under */
+/*  the highlights. Each part has its own colour (homeData: color): a solid  */
+/*  icon tile, a large faint copy of the icon in the corner, and on hover a  */
+/*  light wash of that colour, the tile tilts, the corner icon rises and an  */
+/*  arrow slides in (always shown on touch screens).                         */
 /* ======================================================================== */
+const EASE = 'ease-[cubic-bezier(0.22,1,0.36,1)]'
+
 export function QuickLinks({ items = [] }) {
   return (
-    <nav className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-4">
-      {items.map((q) => {
+    <nav className="mt-5 grid grid-cols-2 overflow-clip rounded-[22px] bg-white shadow-[0_18px_40px_-30px_rgb(12_80_72/0.55)] ring-1 ring-[#e3ecea] sm:mt-6 lg:grid-cols-4">
+      {items.map((q, i) => {
         const Icon = ICONS[q.icon] || Store
+        // thin lines between the parts: 2 × 2 on phones / tablets, one row on desktop
+        const lines = [i % 2 ? 'border-l' : '', i >= 2 ? 'border-t lg:border-t-0' : '', i ? 'lg:border-l' : ''].join(' ')
         return (
           <SmartLink
             key={q.label}
             href={q.url}
             style={{ '--c': q.color || '#138377' }}
-            className="group relative flex flex-col items-center gap-2 overflow-hidden rounded-[18px] text-center sm:flex-row sm:gap-3 sm:text-left border border-[#e6eeec] bg-white px-3.5 py-3.5 shadow-[0_6px_18px_-14px_rgb(12_80_72/0.45)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--c)_35%,white)] hover:bg-[color-mix(in_srgb,var(--c)_6%,white)] hover:shadow-[0_18px_32px_-18px_var(--c)] sm:px-4 sm:py-4"
+            className={`group relative flex flex-col items-start gap-3 overflow-clip border-[#edf2f1] px-4 py-4 transition-colors duration-300 hover:bg-[color-mix(in_srgb,var(--c)_6%,white)] focus-visible:bg-[color-mix(in_srgb,var(--c)_6%,white)] sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-5 ${lines}`}
           >
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--c)_13%,white)] text-[var(--c)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-[-8deg] group-hover:scale-110 group-hover:bg-[var(--c)] group-hover:text-white sm:size-11">
-              <Icon className="size-[19px] sm:size-5" strokeWidth={2} />
+            {/* large faint icon in the corner */}
+            <Icon
+              aria-hidden="true"
+              strokeWidth={1.5}
+              className={`pointer-events-none absolute -right-4 -bottom-5 size-20 rotate-[-14deg] text-[var(--c)] opacity-[0.07] transition duration-500 ${EASE} group-hover:-translate-y-1.5 group-hover:rotate-[-4deg] group-hover:opacity-[0.15] sm:size-24`}
+            />
+            <span
+              className={`relative grid size-11 shrink-0 place-items-center rounded-[14px] bg-[var(--c)] text-white shadow-[0_10px_18px_-10px_var(--c)] transition duration-300 ${EASE} group-hover:scale-105 group-hover:-rotate-6 sm:size-12`}
+            >
+              <Icon className="size-5 sm:size-[22px]" strokeWidth={2} />
             </span>
-            <span className="min-w-0 max-w-full sm:flex-1">
-              <span className="block truncate text-[13.5px] font-bold text-ink transition-colors group-hover:text-[var(--c)] sm:text-[15px]">{q.label}</span>
-              {q.hint && <span className="mt-0.5 hidden truncate text-[12px] text-muted sm:block">{q.hint}</span>}
+            <span className="relative min-w-0 max-w-full sm:flex-1">
+              <span className="block truncate text-[15px] font-bold text-ink sm:text-[16px]">{q.label}</span>
+              {q.hint && <span className="mt-0.5 block truncate text-[12.5px] text-muted sm:text-[13px]">{q.hint}</span>}
             </span>
-            <span className="hidden size-7 shrink-0 place-items-center rounded-full text-[#9aa9a6] sm:grid transition duration-300 group-hover:translate-x-0.5 group-hover:bg-[var(--c)] group-hover:text-white">
-              <ChevronRight className="size-4" strokeWidth={2.6} />
-            </span>
-            {/* colour line that grows along the bottom edge */}
+            {/* arrow: slides in on hover (mouse) · always there on touch screens */}
             <span
               aria-hidden="true"
-              className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[var(--c)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
-            />
+              className={`absolute top-4 right-4 grid size-8 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--c)_12%,white)] text-[var(--c)] transition duration-300 ${EASE} sm:relative sm:top-auto sm:right-auto [@media(hover:hover)]:-translate-x-2 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-x-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:translate-x-0 [@media(hover:hover)]:group-focus-visible:opacity-100`}
+            >
+              <ArrowRight className="size-4" strokeWidth={2.4} />
+            </span>
           </SmartLink>
         )
       })}

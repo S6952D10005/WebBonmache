@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Minus, Plus, RotateCcw, RotateCw, Map, Move, Layers, FileImage } from 'lucide-react'
+import { Minus, Plus, RotateCcw, RotateCw, Map, Move, Layers, FileImage, Pointer, MousePointerClick } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { ZONE_COLORS } from '../data/marketFloorPlan'
 import './MarketMap.css'
@@ -22,6 +22,11 @@ export default function MarketMap({ counts = {}, selected = '', onSelect }) {
   const [dragging, setDragging] = useState(false)
   const [panEnabled, setPanEnabled] = useState(false)
   const [size, setSize] = useState({ w: 800, h: 600 })
+  // "Tap to explore": until the first tap / click the map shows a hint and the mouse wheel
+  // scrolls the page past it instead of zooming. Any tap on the map or its buttons starts it.
+  const [active, setActive] = useState(false)
+  const [mouse] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches)
+  const activate = () => setActive(true)
   const svg = useRef(null)
   const drag = useRef(null)
   const initial = sceneBounds(bearing, flat)
@@ -70,13 +75,13 @@ export default function MarketMap({ counts = {}, selected = '', onSelect }) {
     if (p) setBox(b => ({ ...b, x: clamp(b.x + d.p.x - p.x, initial.x - b.w * 0.66, initial.x + initial.w - b.w * 0.34), y: clamp(b.y + d.p.y - p.y, initial.y - b.h * 0.66, initial.y + initial.h - b.h * 0.34) }))
   }
   const end = () => { if (drag.current) drag.current.active = false; setDragging(false) }
-  // The mouse wheel zooms around the pointer. Once fully zoomed out, scrolling down
-  // goes back to scrolling the page, so the map never traps the page.
+  // The mouse wheel zooms around the pointer once the map has been started. Once fully
+  // zoomed out, scrolling down goes back to scrolling the page, so the map never traps the page.
   useEffect(() => {
     const el = svg.current
     if (!el) return
     const wheel = e => {
-      if (!e.deltaY || (e.deltaY > 0 && zoom <= 1.001)) return
+      if (!active || !e.deltaY || (e.deltaY > 0 && zoom <= 1.001)) return
       e.preventDefault()
       const m = el.getScreenCTM()
       const at = m && new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse())
@@ -94,9 +99,10 @@ export default function MarketMap({ counts = {}, selected = '', onSelect }) {
   return (
     <div className="bm-floor">
       <div className="bm-floor-layout">
-        <div className="bm-floor-canvas">
+        <div className="bm-floor-canvas" onClickCapture={active ? undefined : activate}>
           <svg ref={svg} viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`} className={`bm-floor-svg ${panEnabled ? 'is-pannable' : ''} ${dragging ? 'is-dragging' : ''}`}
             role="group" aria-label={text('แผนผัง 3 มิติของบองมาร์เช่ แตะอาคารเพื่อกรองร้านค้า', 'Bon Marché 3D site map. Tap a building to filter shops', 'Bon Marché 3D 地图，点击楼栋筛选店铺')}
+            onFocus={active ? undefined : activate}
             onPointerLeave={() => { if (!drag.current?.moved) drag.current = null }} onPointerDown={start} onPointerMove={move} onPointerUp={end}
             onPointerCancel={() => { drag.current = null; end() }} onLostPointerCapture={end}
             onClickCapture={e => { if (drag.current?.moved) { e.stopPropagation(); drag.current = null } }}>
@@ -106,6 +112,19 @@ export default function MarketMap({ counts = {}, selected = '', onSelect }) {
             <MarketModel bearing={bearing} flat={flat} selected={selected} onPick={pick} plan={plan} uid={uid} />
             <MarketLabels bearing={bearing} flat={flat} selected={selected} onPick={pick} name={name} landmark={landmark} ups={ups} zoom={zoom} show={labels} counts={counts} />
           </svg>
+
+          {/* covers the map (not its buttons) until the first tap / click */}
+          <button type="button" className={`bm-floor-gate ${active ? 'is-off' : ''}`} onClick={activate} tabIndex={active ? -1 : 0} aria-hidden={active || undefined}>
+            <span className="bm-floor-gate-card">
+              <span className="bm-floor-gate-icon">{mouse ? <MousePointerClick size={20} /> : <Pointer size={20} />}</span>
+              <span>
+                <b>{mouse ? text('คลิกเพื่อดูแผนที่', 'Click to explore the map', '点击浏览地图') : text('แตะเพื่อดูแผนที่', 'Tap to explore the map', '点击浏览地图')}</b>
+                <small>{mouse
+                  ? text('จากนั้นเลื่อนลูกกลิ้งเพื่อซูม และคลิกอาคารเพื่อดูร้านค้า', 'Then scroll to zoom and click a building to see its shops', '然后滚动缩放，点击楼栋查看店铺')
+                  : text('จากนั้นแตะอาคารเพื่อดูร้านค้า', 'Then tap a building to see its shops', '然后点击楼栋查看店铺')}</small>
+              </span>
+            </span>
+          </button>
 
           <div className="bm-scene-mode">
             <button type="button" aria-pressed={!flat} onClick={() => view(bearing, false)}>3D</button>

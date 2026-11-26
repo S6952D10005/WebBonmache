@@ -40,9 +40,9 @@ export function useActiveMenu(menus) {
   const lockUntil = useRef(0)
 
   useEffect(() => {
-    // other pages (e.g. /shops): the page's own menu is the current one
+    // other pages (e.g. /shops, /blog/<post>): the page's own menu is the current one
     if (pathname !== '/') {
-      setActive(pathname)
+      setActive(`/${pathname.split('/')[1]}`)
       return
     }
     const urls = [...new Set(menus.flatMap((m) => [m.url, ...(m.children || []).map((c) => c.url)]))]

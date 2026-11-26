@@ -6,6 +6,10 @@ import SmartLink from './components/SmartLink'
 import ShopDirectory from './pages/ShopDirectory'
 import Home from './pages/Home'
 import News from './pages/News'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
+import About from './pages/About'
+import Contact from './pages/Contact'
 import { BackToTop, ScrollProgress, useScrollReveal } from './components/ScrollFx'
 import { defaultData } from './data/defaultData'
 import { useI18n } from './i18n'
@@ -15,14 +19,21 @@ import { useI18n } from './i18n'
  * "/home" (the home page's old address) redirects to "/".
  */
 export const HOME_URL = '/'
-// older menu rows point "หน้าแรก" at "#" or "/home" → the home page
-const toHome = (list) => list.map((m) => (m.url === '#' || m.url === '/home' ? { ...m, url: HOME_URL } : m))
+// older menu rows point "หน้าแรก" at "#" or "/home" → the home page,
+// "Blog" / "About Us" / "Contact" at "#blog" / "#about" / "#contact" → their own pages
+const OLD_URLS = { '#': HOME_URL, '/home': HOME_URL, '#blog': '/blog', '#about': '/about', '#contact': '/contact' }
+const toHome = (list) => list.map((m) => (OLD_URLS[m.url] ? { ...m, url: OLD_URLS[m.url] } : m))
+// settings still holding the database's sample values ("#" links, the sample address it was created
+// with) = not filled in yet → keep the built-in (real) value from defaultData.js.
+// Any other value saved in site_settings is used as it is.
+const SAMPLE_VALUES = new Set(['#', '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10250'])
+const filled = (settings = {}) => Object.fromEntries(Object.entries(settings).filter(([, v]) => !SAMPLE_VALUES.has(v)))
 
 /** Merge API data over the defaults so the page always renders. */
 function merge(api) {
   const pick = (arr, fallback) => (Array.isArray(arr) && arr.length ? arr : fallback)
   return {
-    settings: { ...defaultData.settings, ...(api?.settings || {}) },
+    settings: { ...defaultData.settings, ...filled(api?.settings) },
     menus: toHome(pick(api?.menus, defaultData.menus)),
     categories: pick(api?.categories, defaultData.categories),
     footerLinks: toHome(pick(api?.footerLinks, defaultData.footerLinks)),
@@ -115,6 +126,10 @@ export default function App() {
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/shops" element={<ShopDirectory settings={settings} categories={categories} />} />
             <Route path="/news" element={<News settings={settings} />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact settings={settings} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
