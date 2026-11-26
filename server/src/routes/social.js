@@ -28,10 +28,11 @@ const PER_SOURCE = 8 // posts asked from each app (the site shows the newest 4)
 const CACHE_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../.cache/social.json')
 
 /* ---------------- Graph API ---------------- */
-async function graph(endpoint, params) {
+async function graph(endpoint, token, params) {
   const url = new URL(`${GRAPH}/${endpoint}`)
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
-  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+  // the token goes in a header, not the URL (URLs end up in logs)
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) })
   const body = await res.json().catch(() => ({}))
   if (!res.ok || body.error) {
     const err = new Error(body.error?.message || `HTTP ${res.status}`)
@@ -57,8 +58,9 @@ export function fromFacebook(rows = []) {
         platform: 'facebook',
         ...splitMessage(p.message),
         time: p.created_time,
-        likes: p.reactions?.summary?.total_count ?? 0, // all reactions (👍❤️😆 …)
-        comments: p.comments?.summary?.total_count ?? 0,
+        // all reactions (👍❤️😆 …) · null = counts not asked (token can't read them) → hidden on the card
+        likes: p.reactions ? (p.reactions.summary?.total_count ?? 0) : null,
+        comments: p.comments ? (p.comments.summary?.total_count ?? 0) : null,
         image: p.full_picture || null,
         video: /video/i.test(kind),
         url: p.permalink_url,
@@ -80,24 +82,39 @@ export function fromInstagram(rows = []) {
   }))
 }
 
+/*
+ * Facebook posts. Reaction / comment counts need the token to have pages_read_user_content;
+ * without it Facebook refuses the whole request (#10) – then ask again without the counts,
+ * so the posts still show (the cards just hide the counts). Remembered until the server
+ * restarts, which it does when server/.env (the token) changes.
+ */
+const FB_FIELDS = 'id,message,created_time,permalink_url,full_picture,status_type,attachments.limit(1){media_type,type}'
+const FB_COUNTS = 'reactions.summary(total_count).limit(0),comments.summary(total_count).limit(0)'
+let fbCounts = true
+
+async function facebookPosts(page, token) {
+  const ask = async (fields) => fromFacebook((await graph(`${page}/posts`, token, { fields, limit: PER_SOURCE })).data)
+  if (fbCounts) {
+    try {
+      return await ask(`${FB_FIELDS},${FB_COUNTS}`)
+    } catch (err) {
+      if (err.code !== 10 && err.code !== 200) throw err
+      fbCounts = false
+      logOnce({ code: 'counts', message: 'แสดงโพสต์ได้ แต่ยังไม่มียอดรีแอกชัน / คอมเมนต์' })
+    }
+  }
+  return ask(FB_FIELDS)
+}
+
 async function fetchAll() {
   const { FB_PAGE_ID, FB_PAGE_TOKEN: token, IG_USER_ID } = process.env
   const jobs = []
-  if (FB_PAGE_ID)
-    jobs.push(
-      graph(`${FB_PAGE_ID}/posts`, {
-        fields:
-          'id,message,created_time,permalink_url,full_picture,status_type,attachments.limit(1){media_type,type},reactions.summary(total_count).limit(0),comments.summary(total_count).limit(0)',
-        limit: PER_SOURCE,
-        access_token: token,
-      }).then((r) => fromFacebook(r.data)),
-    )
+  if (FB_PAGE_ID) jobs.push(facebookPosts(FB_PAGE_ID, token))
   if (IG_USER_ID)
     jobs.push(
-      graph(`${IG_USER_ID}/media`, {
+      graph(`${IG_USER_ID}/media`, token, {
         fields: 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
         limit: PER_SOURCE,
-        access_token: token,
       }).then((r) => fromInstagram(r.data)),
     )
   const results = await Promise.allSettled(jobs)
@@ -154,9 +171,11 @@ function hint(err) {
   switch (err.code) {
     case 190:
       return 'token หมดอายุหรือใช้ไม่ได้ → สร้าง Page token ใหม่ตาม server/SOCIAL-SETUP.md แล้วแก้ FB_PAGE_TOKEN ใน server/.env'
+    case 'counts':
+      return 'token ยังไม่มีสิทธิ์ pages_read_user_content → เพิ่มสิทธิ์นี้แล้วสร้าง Page token ใหม่ตาม server/SOCIAL-SETUP.md ยอดจะขึ้นเอง'
     case 10:
     case 200:
-      return 'token ยังไม่มีสิทธิ์อ่านโพสต์ → ตอนสร้าง token ให้ติ๊ก pages_read_engagement (และ instagram_basic ถ้าดึง IG)'
+      return 'token ยังไม่มีสิทธิ์อ่านโพสต์ → ตอนสร้าง token ให้ติ๊ก pages_read_engagement, pages_read_user_content (และ instagram_basic ถ้าดึง IG)'
     case 100:
       return 'FB_PAGE_ID / IG_USER_ID ไม่ถูกต้อง → ตรวจตัวเลข ID ใน server/.env'
     case 4:
