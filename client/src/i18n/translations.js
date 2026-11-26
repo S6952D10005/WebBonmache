@@ -447,6 +447,7 @@ export const DICT = {
   'สำรวจตลาด': ['Discover', '探索市场'],
   'นำทาง': ['Get directions', '导航'],
   'ตลาดสดพรีเมียมและคอมมูนิตี้ย่านจตุจักร เดินทางสะดวก มีที่จอดรถกว่า 500 คัน': ['A premium fresh market and community space in Chatuchak, easy to reach, with parking for over 500 cars', '位于乍都乍的高端生鲜市场与社区空间，交通便利，拥有 500 多个停车位'],
+  'ติดตามร้าน': ['Follow the shop', '关注店铺'],
   'กลับขึ้นด้านบน': ['Back to top', '返回顶部'],
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { ChevronDown, Clock, MapPin, Phone, RotateCcw, Search, SearchX, Store, X } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, Clock, MapPin, Phone, RotateCcw, Search, SearchX, Store, X } from 'lucide-react'
 import { CATEGORY_ICONS } from '../components/Categories'
 import { LeafBranch } from '../components/Decor'
 import SmartLink from '../components/SmartLink'
@@ -150,6 +150,35 @@ function ShopCard({ shop, category, onOpen }) {
   )
 }
 
+/* a shop's social pages: brand colour (tile + hover glow) and its mark */
+const SOCIALS = [
+  {
+    key: 'facebook',
+    label: 'Facebook',
+    color: '#1877f2',
+    bg: '#1877f2',
+    icon: 'M14 8h2.5V5H14c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3h-3V9c0-.6.4-1 1-1Z',
+  },
+  {
+    key: 'instagram',
+    label: 'Instagram',
+    color: '#d62976',
+    bg: 'linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%)',
+    icon: 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm5.5-1.8a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z',
+  },
+]
+// account name from the link ("instagram.com/topsthailand" → "@topsthailand");
+// share links ("facebook.com/share/…") have none, so the shop's name is shown
+function socialHandle(key, url, shopName) {
+  try {
+    const first = new URL(url).pathname.split('/').filter(Boolean)[0]
+    if (!first || ['share', 'profile.php', 'p', 'reel', 'people'].includes(first)) return shopName
+    return key === 'instagram' ? `@${first}` : decodeURIComponent(first)
+  } catch {
+    return shopName
+  }
+}
+
 function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
   const { t } = useI18n()
   const photos = shop.gallery?.length ? shop.gallery : []
@@ -247,26 +276,41 @@ function ShopDialog({ shop, category, zoneName, open, mapUrl, onClose }) {
               ))}
           </dl>
 
-          {(shop.facebook || shop.instagram) && (
-            <div className="mt-3 flex flex-wrap gap-2 md:mt-4">
-              {[
-                [shop.facebook, 'Facebook', '#1877f2', 'M14 8h2.5V5H14c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3h-3V9c0-.6.4-1 1-1Z'],
-                [shop.instagram, 'Instagram', '#e1306c', 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm5.5-1.8a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z'],
-              ]
-                .filter(([url]) => url)
-                .map(([url, label, color, d]) => (
+          {SOCIALS.some((x) => shop[x.key]) && (
+            <div className="mt-5 md:mt-6">
+              <p className="mb-2.5 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-muted">
+                {t('ติดตามร้าน')}
+                <span aria-hidden="true" className="h-px flex-1 bg-[#e8efed]" />
+              </p>
+              <div className="grid gap-2.5 sm:grid-cols-2 md:gap-3">
+                {SOCIALS.filter((x) => shop[x.key]).map((x) => (
                   <a
-                    key={label}
-                    href={url}
+                    key={x.key}
+                    href={shop[x.key]}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-2 rounded-full border border-[#e6eeec] px-3.5 text-[13px] font-semibold text-ink transition hover:border-current md:h-10 md:px-4 md:text-[14px]"
-                    style={{ color }}
+                    aria-label={`${x.label} · ${shop.name}`}
+                    className="group flex items-center gap-2.5 rounded-2xl border border-[#e6eeec] bg-white p-2.5 pr-3 transition duration-300 hover:-translate-y-0.5 hover:border-transparent hover:shadow-[0_14px_28px_-16px_var(--c)] md:p-3 md:pr-4"
+                    style={{ '--c': x.color }}
                   >
-                    <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" fillRule="evenodd" aria-hidden="true"><path d={d} /></svg>
-                    <span className="text-ink">{label}</span>
+                    <span
+                      className="grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] transition duration-300 group-hover:scale-105 md:size-11"
+                      style={{ background: x.bg }}
+                    >
+                      <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" fillRule="evenodd" aria-hidden="true">
+                        <path d={x.icon} />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 flex-1 leading-tight">
+                      <span className="block text-[13.5px] font-bold text-ink md:text-[14.5px]">{x.label}</span>
+                      <span className="mt-0.5 block truncate text-[12px] text-muted md:text-[12.5px]">{socialHandle(x.key, shop[x.key], shop.name)}</span>
+                    </span>
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#f3f6f5] text-[#7a8785] transition duration-300 group-hover:bg-(--c) group-hover:text-white">
+                      <ArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:-translate-y-px group-hover:translate-x-px" strokeWidth={2.4} />
+                    </span>
                   </a>
                 ))}
+              </div>
             </div>
           )}
 
